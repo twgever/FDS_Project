@@ -20,10 +20,99 @@
 \maketitle
 
 \begin{abstract}
-Your abstract.
+Academic success is relevant to students satisfaction and consequent commitment in studying, leading them to become well formed professional figures. This project aims to understand which are the factors that influence the most the scores that the students get in their exams, by considering the case of the British Open University. Linear and non-linear machine learning models have been trained to predict the performance of the students in various assessments.
 \end{abstract}
 
 \section{Introduction}
+The Open University is a public university in England that provides data about demographic information and academic performance of its students in order to allow learning analytics. We based our project on \textit{The Open University Learning Analytics dataset}, which is also available on Kaggle (\url{https://www.kaggle.com/datasets/rocki37/open-university-learning-analytics-dataset}). \\
+
+We were interested in this dataset as it provides data about students interaction with the \textit{Virtual Learning Environmment} (\textit{VLE}), an online platform holding teaching materials and resources for the university courses. This could be an opportunity to test how much new technologies can help the learning process. That, combined with the availability of information about the social status of the students (age, gender, disability, education level, etc.) and their academic career (scores in assessment, number of studied credits, etc.) makes the Open University dataset a good choice for our purposes. \\
+
+We selected different machine learning models to implement the prediction of students scores in assessments, both in the form of a regression and a multinomial classification task (by dividing the students according to some thresholds on the score range): \textit{linear regression}, \textit{decision trees} and \textit{KNN regression} will be used for regression, \textit{logistic regression }and \textit{neural networks} for classification. Having multiple trained models for each task allow us to compare the results, determine which model performs best and try to understand why.
+
+\section{Dataset}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.7\textwidth]{database.png}
+\caption{\label{fig:dataset}The organization of the tables in the Open University Learning Analytics dataset (\url{https://analyse.kmi.open.ac.uk/open_dataset})}
+\end{figure}
+
+The Open University Learning Analytics dataset contains data about 22 courses with 32,593 registered students \cite{dataset}. It is organized in seven relational tables, as show in Figure \ref{fig:dataset}:
+\begin{itemize}
+    \item \textbf{courses}: includes the list of all available courses (which are called \textit{modules}) and their \textit{presentations} (i.e. the occurence of a course in a specific academic year). The columns are:
+    \begin{itemize}
+        \item \textit{code module}: code name of the module, which serves as the identifier;
+        \item \textit{code presentation}: code name of the presentation, which consists of the year and “B” for the presentation starting in February or “J” for the presentation starting in October;
+        \item \textit{length}: length of the module-presentation in days.
+    \end{itemize}
+
+    \item \textbf{assessments}: contains information about assessments in module-presentations, which are typically a number of assessments followed by the final exam. The columns are:
+    \begin{itemize}
+        \item \textit{code module}: identification code of the module to which the assessment belongs;
+        \item \textit{code presentation}: identification code of the presentation to which the assessment belongs;
+        \item \textit{id assessment}: identification number of the assessment;
+        \item \textit{assessment type}: type of assessment, it can be: Tutor Marked Assessment (TMA), Computer Marked Assessment (CMA) or Final Exam (Exam);
+        \item \textit{date}: information about the final submission date of the assessment calculated as the number of days since the start of the module-presentation (the starting date of the presentation has number 0);
+        \item \textit{weight}: weight of the assessment in percentage: final exams are treated separately and have weight 100\%, the sum of all other assessments is 100\%.  
+    \end{itemize}
+
+    \item \textbf{vle}: includes data about the available materials in the VLE (html pages, pdf files, etc.); students interactions with the materials are recorded. The table contains the following columns:
+    \begin{itemize}
+        \item \textit{id site}: an identification number of the material;
+        \item \textit{code module }: an identification code for module;
+        \item \textit{code presentation}: an identification code of presentation;
+        \item \textit{activity type}: the role associated with the module material;
+        \item \textit{week from}: the week from which the material is planned to be used;
+        \item \textit{week to}: week until which the material is planned to be used.
+    \end{itemize}
+
+    \item \textbf{studentInfo}: contains demographic information about the students together with their results. The columns are:
+    \begin{itemize}
+        \item \textit{code module}: an identification code for a module on which the student is registered;
+        \item \textit{code presentation}: the identification code of the presentation during which the student is registered on the module;
+        \item \textit{id student}: a unique identification number for the student;
+        \item \textit{gender}: the student’s gender;
+        \item \textit{region}: identifies the geographic region, where the student lived while taking the module-presentation;
+        \item \textit{highest education}: highest student education level on entry to the module presentation;
+        \item \textit{imd band}: specifies the \textit{Index of Multiple Depravation band} of the place where the student lived during the module-presentation;
+        \item \textit{age band}: band of the student’s age;
+        \item \textit{num. of prev. attempts }: the number times the student has attempted this module;
+        \item \textit{studied credits}: the total number of credits for the modules the student is currently studying;
+        \item \textit{disability}: indicates whether the student has declared a disability;
+        \item \textit{final result}: student’s final result in the module-presentation.
+    \end{itemize}
+
+    \item \textbf{studentRegistration}: contains information about the time when the student registered or unregistered for the module presentation. The colums are:
+    \begin{itemize}
+        \item \textit{code module}: an identification code for a module;
+        \item \textit{code presentation}: the identification code of the presentation;
+        \item \textit{id student}: a unique identification number for the student;
+        \item \textit{date registration}: the date of student’s registration on the module presentation, as the number of days measured relative to the start of the module-presentation (e.g. the negative value -30 means that the student registered to module presentation 30 days before it started);
+        \item \textit{date unregistration}: date of student unregistration from the module presentation (students  who completed the course have this field empty; students who unregistered have withdrawal as the value of the \textit{final result} column in the \textit{studentInfo} table).
+    \end{itemize}
+
+    \item \textbf{studentAssessment}: shows the results of students’ assessments. If the student does not submit the assessment, no result is recorded. The final exam submissions is missing if the result of the assessments is not stored in the system. It contains the following columns:
+    \begin{itemize}
+        \item \textit{id assessment}: the identification number of the assessment;
+        \item \textit{id student}: a unique identification number for the student;
+        \item \textit{date submitted}: the date of student submission, measured as the number of days since the start of the module presentation;
+        \item \textit{is banked}: a status flag indicating that the assessment result has been transferred from a previous presentation;
+        \item \textit{score}: the student’s score in this assessment; the range is from 0 to 100. A score lower than 40 is interpreted as Fail.
+    \end{itemize}
+
+    \item \textbf{studentVle}: contains information about each student’s interactions with the materials in the VLE. The columns are:
+    \begin{itemize}
+        \item \textit{code module}: an identification code for a module;
+        \item \textit{code presentation}: the identification code of the module presentation;
+        \item \textit{id student}: a unique identification number for the student;
+        \item \textit{id site}: an identification number for the VLE material;
+        \item \textit{date}: the date of student’s interaction with the material measured as the number of days since the start of the module-presentation;
+        \item \textit{sum click}: the number of times a student interacts with the material in that day.
+    \end{itemize}
+
+    \end{itemize}
+
 
 
 \section{Data Preprocessing}
@@ -34,89 +123,6 @@ Your abstract.
 \subsection{Logistic regression}
 \subsection{Neural Networks}
 \section{Result analysis}
-
-\section{tutorial}
-\subsection{How to create Sections and Subsections}
-
-Simply use the section and subsection commands, as in this example document! With Overleaf, all the formatting and numbering is handled automatically according to the template you've chosen. If you're using Rich Text mode, you can also create new section and subsections via the buttons in the editor toolbar.
-
-\subsection{How to include Figures}
-
-First you have to upload the image file from your computer using the upload link in the file-tree menu. Then use the includegraphics command to include it in your document. Use the figure environment and the caption command to add a number and a caption to your figure. See the code for Figure \ref{fig:frog} in this section for an example.
-
-Note that your figure will automatically be placed in the most appropriate place for it, given the surrounding text and taking into account other figures or tables that may be close by. You can find out more about adding images to your documents in this help article on \href{https://www.overleaf.com/learn/how-to/Including_images_on_Overleaf}{including images on Overleaf}.
-
-\begin{figure}
-\centering
-\includegraphics[width=0.3\textwidth]{frog.jpg}
-\caption{\label{fig:frog}This frog was uploaded via the file-tree menu.}
-\end{figure}
-
-\subsection{How to add Tables}
-
-Use the table and tabular environments for basic tables --- see Table~\ref{tab:widgets}, for example. For more information, please see this help article on \href{https://www.overleaf.com/learn/latex/tables}{tables}. 
-
-\begin{table}
-\centering
-\begin{tabular}{l|r}
-Item & Quantity \\\hline
-Widgets & 42 \\
-Gadgets & 13
-\end{tabular}
-\caption{\label{tab:widgets}An example table.}
-\end{table}
-
-\subsection{How to add Comments and Track Changes}
-
-Comments can be added to your project by highlighting some text and clicking ``Add comment'' in the top right of the editor pane. To view existing comments, click on the Review menu in the toolbar above. To reply to a comment, click on the Reply button in the lower right corner of the comment. You can close the Review pane by clicking its name on the toolbar when you're done reviewing for the time being.
-
-Track changes are available on all our \href{https://www.overleaf.com/user/subscription/plans}{premium plans}, and can be toggled on or off using the option at the top of the Review pane. Track changes allow you to keep track of every change made to the document, along with the person making the change. 
-
-\subsection{How to add Lists}
-
-You can make lists with automatic numbering \dots
-
-\begin{enumerate}
-\item Like this,
-\item and like this.
-\end{enumerate}
-\dots or bullet points \dots
-\begin{itemize}
-\item Like this,
-\item and like this.
-\end{itemize}
-
-\subsection{How to write Mathematics}
-
-\LaTeX{} is great at typesetting mathematics. Let $X_1, X_2, \ldots, X_n$ be a sequence of independent and identically distributed random variables with $\text{E}[X_i] = \mu$ and $\text{Var}[X_i] = \sigma^2 < \infty$, and let
-\[S_n = \frac{X_1 + X_2 + \cdots + X_n}{n}
-      = \frac{1}{n}\sum_{i}^{n} X_i\]
-denote their mean. Then as $n$ approaches infinity, the random variables $\sqrt{n}(S_n - \mu)$ converge in distribution to a normal $\mathcal{N}(0, \sigma^2)$.
-
-
-\subsection{How to change the margins and paper size}
-
-Usually the template you're using will have the page margins and paper size set correctly for that use-case. For example, if you're using a journal article template provided by the journal publisher, that template will be formatted according to their requirements. In these cases, it's best not to alter the margins directly.
-
-If however you're using a more general template, such as this one, and would like to alter the margins, a common way to do so is via the geometry package. You can find the geometry package loaded in the preamble at the top of this example file, and if you'd like to learn more about how to adjust the settings, please visit this help article on \href{https://www.overleaf.com/learn/latex/page_size_and_margins}{page size and margins}.
-
-\subsection{How to change the document language and spell check settings}
-
-Overleaf supports many different languages, including multiple different languages within one document. 
-
-To configure the document language, simply edit the option provided to the babel package in the preamble at the top of this example project. To learn more about the different options, please visit this help article on \href{https://www.overleaf.com/learn/latex/International_language_support}{international language support}.
-
-To change the spell check language, simply open the Overleaf menu at the top left of the editor window, scroll down to the spell check setting, and adjust accordingly.
-
-\subsection{How to add Citations and a References List}
-
-You can simply upload a \verb|.bib| file containing your BibTeX entries, created with a tool such as JabRef. You can then cite entries from it, like this: \cite{greenwade93}. Just remember to specify a bibliography style, as well as the filename of the \verb|.bib|. You can find a \href{https://www.overleaf.com/help/97-how-to-include-a-bibliography-using-bibtex}{video tutorial here} to learn more about BibTeX.
-
-If you have an \href{https://www.overleaf.com/user/subscription/plans}{upgraded account}, you can also import your Mendeley or Zotero library directly as a \verb|.bib| file, via the upload menu in the file-tree.
-
-\subsection{Good luck!}
-
-We hope you find Overleaf useful, and do take a look at our \href{https://www.overleaf.com/learn}{help library} for more tutorials and user guides! Please also let us know if you have any feedback using the Contact Us link at the bottom of the Overleaf menu --- or use the contact form at \url{https://www.overleaf.com/contact}.
 
 \bibliographystyle{alpha}
 \bibliography{sample}
