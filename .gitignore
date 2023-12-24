@@ -1,6 +1,3 @@
 \data
 \sets
-\nn_weights
-\binary_nn_weights
-\binary_nn_results.txt
-\nn_results.txt
+\neural_networks
