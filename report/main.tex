@@ -56,7 +56,8 @@ The Open University Learning Analytics dataset contains data about 22 courses wi
         \item \textit{date}: information about the final submission date of the assessment calculated as the number of days since the start of the module-presentation (the starting date of the presentation has number 0);
         \item \textit{weight}: weight of the assessment in percentage: final exams are treated separately and have weight 100\%, the sum of all other assessments is 100\%.  
     \end{itemize}
-
+    
+    
     \item \textbf{vle}: includes data about the available materials in the VLE (html pages, pdf files, etc.); students interactions with the materials are recorded. The table contains the following columns:
     \begin{itemize}
         \item \textit{id site}: an identification number of the material;
@@ -114,15 +115,65 @@ The Open University Learning Analytics dataset contains data about 22 courses wi
     \end{itemize}
 
 
-
 \section{Data Preprocessing}
+
+\subsection{Feature selection}
+
+Since our goal was to predict the score of some student in any assessment during a module-presentation, we considered the \textit{score} column in the \textit{studentAssessment} table as our target variable. As for the features, we selected the columns resulting from the join of the \textit{studentInfo}, \textit{studentRegistration}, \textit{studentAssessment}, \textit{studentVle}, \textit{assessments} and \textit{vle} tables. We excluded the \textit{final result} column of \textit{studentInfo} to avoid trivializing the score prediction task and we ignored some columns that seemed less relevant to the student career (such as \textit{is banked} from \textit{studentAssessment}, \textit{date} from \textit{studentVle}, \textit{week from} and \textit{week to} from \textit{vle}).\\ 
+
+While joining \textit{studentVle} and \textit{vle} we decided to aggregate the number of clicks of a student on an online resource on the VLE for some module-presentation, by considering the total sum of clicks on each different type of resource (which is specified by the \textit{activity type} attribute), in order to allow a deeper analysis on the VLE materials contribution to academic success.\\
+
+We also decided to merge together the \textit{date submitted} (from \textit{studentAssessment}) and \textit{date} (from \textit{assessments}) attributes into a single \textit{submission delay} feature, computed as the difference of the two, thus considering the time interval between the publication of an assignment and the  student submission.\\
+
+After dropping the \textit{id} columns of the joined tables and deleting the rows corresponding to students with important information missing, we got a dataset of 163,387 rows × 33 columns. We normalized the features values by subtracting the mean and dividing by the standard deviation of each column, thus getting the data distribution shown in Figure \ref{fig:distr}.\\
+
+
+\begin{figure}
+\centering
+\includegraphics[width=0.7\textwidth]{data_distribution.png}
+\caption{\label{fig:distr}Histograms showing the data distribution in our dataset}
+\end{figure}
+
+\subsection{Data analysis}
+
+We computed the correlation matrix for the features of the dataset (Figure \ref{fig:corrmatr}) and observed that there exist some positive correlation between the clicks on different types of online resources (e.g. \textit{homepage clicks} and \textit{forumng clicks}, \textit{questionnaire clicks} and \textit{dataplus clicks} or \textit{oucontent clicks}), probably because they are often accessed sequentially during a single VLE session. There is also a slight negative correlation between the \textit{submission delay} and the number of clicks on some type of resources (e.g. \textit{oucontent}, \textit{quiz}, \textit{questionnaire}), suggesting that a student who is active on the VLE is more likely to submit an assignement with a small delay than a student who don't access online materials.\\
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{correlationmatrix.png}
+\caption{\label{fig:corrmatr}Correlation matrix for the dataset features}
+\end{figure}
+
+We also looked at some scatterplots expressing the relationship between each feature and the target variable (Figure \ref{fig:scatt}), noticing that in some cases the feature don't seem to influence the score value (e.g. \textit{gender}, \textit{region}, \textit{imd band}), whereas other plots show that bigger feature values are associated to larger scores (e.g. \textit{num. of prev. attempts}, \textit{forumng clicks}, \textit{questionnaire clicks}). We count on the latter type of features for the effectiveness of our linear ML models.\\
+
+\begin{figure}
+\centering
+\includegraphics[width=0.4\textwidth]{scatterplots.png}
+\caption{\label{fig:scatt}Scatterplots showing the relationship between each feature and the target variable}
+\end{figure}
+
+Finally, we observed that the dataset contains much more information about students who got high scores in assessments than about students with worse exam outcome (Figure \ref{fig:misrepr}). Although having many students with high grades is good news, this might interfere with the correct prediction of low scores. We tried to counter the problem with oversampling (Section \ref{sec:oversamp}).
+
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{misrepr.png}
+\caption{\label{fig:misrepr}A graph showing the number of dataset rows for each score value}
+\end{figure}
+
+\subsection{Train and test split}
+
+We chose to compute the training and test sets for our ML models by splitting the dataset with the \textit{train\_test\_split} function from the \textit{scikit-learn} library to use 80\% of the original number of samples for training (about 130,700 rows) and the remaining 20\% for testing (about 32,600 rows).
+
 \section{ML models training and testing}
 \subsection{Linear regression}
 \subsection{Decision Trees}
 \subsection{KNN Regression}
 \subsection{Logistic regression}
 \subsection{Neural Networks}
-\section{Result analysis}
+\section{Oversampling}
+\label{sec:oversamp}
+\section{Results analysis}
+\section{Roles of team members}
 
 \bibliographystyle{alpha}
 \bibliography{sample}
