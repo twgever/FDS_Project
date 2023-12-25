@@ -11,6 +11,7 @@
 % Useful packages
 \usepackage{amsmath}
 \usepackage{graphicx}
+\usepackage{subfig}
 \usepackage[colorlinks=true, allcolors=blue]{hyperref}
 
 \title{Student Performance Analysis and Prediction \\ Final project for the Foundations of Data Science course \\(a.a. 2023/2024) }
@@ -28,7 +29,7 @@ The Open University is a public university in England that provides data about d
 
 We were interested in this dataset as it provides data about students interaction with the \textit{Virtual Learning Environmment} (\textit{VLE}), an online platform holding teaching materials and resources for the university courses. This could be an opportunity to test how much new technologies can help the learning process. That, combined with the availability of information about the social status of the students (age, gender, disability, education level, etc.) and their academic career (scores in assessment, number of studied credits, etc.) makes the Open University dataset a good choice for our purposes. \\
 
-We selected different machine learning models to implement the prediction of students scores in assessments, both in the form of a regression and a multinomial classification task (by dividing the students according to some thresholds on the score range): \textit{linear regression}, \textit{decision trees} and \textit{KNN regression} will be used for regression, \textit{logistic regression }and \textit{neural networks} for classification. Having multiple trained models for each task allow us to compare the results, determine which model performs best and try to understand why.
+We selected different machine learning models to implement the prediction of students scores in assessments, both in the form of a regression and a multinomial classification task (by dividing the students according to some thresholds on the score range): \textit{linear regression}, \textit{decision trees} and \textit{KNN regression} will be used for regression, \textit{logistic regression }and \textit{neural networks} for classification. Having multiple trained models for each task allow us to compare the results, determine which model performs best and try to understand why. The code of our work can be found at \url{https://github.com/twgever/FDS_Project}. %rendere pubblica
 
 \section{Dataset}
 
@@ -165,8 +166,46 @@ Finally, we observed that the dataset contains much more information about stude
 We chose to compute the training and test sets for our ML models by splitting the dataset with the \textit{train\_test\_split} function from the \textit{scikit-learn} library to use 80\% of the original number of samples for training (about 130,700 rows) and the remaining 20\% for testing (about 32,600 rows).
 
 \section{ML models training and testing}
+We leveraged the \textit{scikit-learn} Python library to implement some ML models for the regression and classification tasks of predicting the score of a student in a module-presentation assessment. We trained linear (\textit{linear regression}, \textit{logistic regression}) and non-linear (\textit{decision trees}, \textit{KNN}, \textit{neural networks}) models to see if there are some differences in the results they provide.\\
+
+We evaluated our regression models by computing the \textit{RMSE} and \textit{R2} scores, while we considered the \textit{accuracy} for our classification models.
+
 \subsection{Linear regression}
+
+
 \subsection{Decision Trees}
+
+Decision trees are a simple ML model that should be able to deal with the non-linear relationship that some features show with the target variable. However, they might be prone to overfitting, as they are built by splitting the training samples according to their values for the most important features.\\
+
+Since we aim to predict the exact score of a student in an assessment, we use the \textit{scikit-learn} \textit{DecisionTreeRegressor} class (\url{https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeRegressor.html}). Such implementation of decision trees has many hyperparameters, but we selected \textit{min\_samples\_leaf} and \textit{min\_samples\_split} as the the most significant ones: the former determines the minimum number of samples required to be at a leaf node, the latter specifies the minimum number of samples required to split an internal node. So these parameters influence the size of the decision tree and the extent of overfitting.\\
+
+Some hyperparameters tuning (Figure \ref{fig:heatmap}) was done to find out the values that allow to reach the best performance: with \textit{min\_sample\_leaf} set to 45 and \textit{min\_sample\_split} set to any value between 5 and 50 we can reach an RMSE score of about 16.36 and an R2 score of 0.23 on the test set. Since the scores for the prediction on the train set were $RMSE = 15.01$ and $R2 = 0.36$ the model doesn't seem to overfit too much. \\
+
+\begin{figure}%
+    \centering
+    \subfloat[\centering RMSE heatmap]{{\includegraphics[width=7cm]{DTheatmap1.png} }}%
+    \qquad
+    \subfloat[\centering R2 score heatmap]{{\includegraphics[width=7cm]{DTheatmap2.png} }}%
+    \caption{Heatmaps showing the RMSE and R2 values for different choices of \textit{min\_sample\_leaf} and \textit{min\_sample\_split}}%
+    \label{fig:heatmap}%
+\end{figure}
+
+By visualizing the first levels of the decision tree with the best hyperparameters values (Figure \ref{fig:dtstruct}) we understand that the features that are more relevant to the score prediction are \textit{assessment type}, \textit{homepage clicks}, \textit{weight}, \textit{submission delay}, \textit{quiz clicks}, \textit{subpage clicks}, as they are the first features chosen to split the train set on. \\
+
+\begin{figure}
+\centering
+\includegraphics[width=1.0\textwidth]{DTstructure.png}
+\caption{\label{fig:dtstruct}The first 4 levels of the DecisionTreeRegressor with \textit{min\_sample\_leaf} set to 45 and \textit{min\_sample\_split} set to 10}
+\end{figure}
+
+As we expected, the model makes bigger mistakes when trying to predict lower scores (Figure \ref{fig:dtperf}), due to the big gap between the number of students with high and low scores that are present in the dataset. 
+
+\begin{figure}
+\centering
+\includegraphics[width=0.5\textwidth]{DTnew.png}
+\caption{\label{fig:dtperf}The mean error for each real score that the model tries to predict}
+\end{figure}
+
 \subsection{KNN Regression}
 \subsection{Logistic regression}
 \subsection{Neural Networks}
@@ -174,6 +213,15 @@ We chose to compute the training and test sets for our ML models by splitting th
 \label{sec:oversamp}
 \section{Results analysis}
 \section{Roles of team members}
+We worked together on the dataset choice, data preprocessing and analysis, then each of us focused on a different ML model: 
+\begin{itemize}
+    \item Paolo Cursi: Linear Regression
+    \item Arianna Paolini: Decision Trees
+    \item Pietro Signorino: KNN Regression
+    \item Tommaso Leonardi: Logistic Regression
+    \item Stefano Saravalle: Neural Networks
+\end{itemize}
+Finally, we compared our results and discussed about them to understand what we learnt from this project.
 
 \bibliographystyle{alpha}
 \bibliography{sample}
