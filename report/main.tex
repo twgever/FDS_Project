@@ -14,6 +14,8 @@
 \usepackage{subfig}
 \usepackage[colorlinks=true, allcolors=blue]{hyperref}
 
+\graphicspath{ {./figures/} }
+
 \title{Student Performance Analysis and Prediction \\ Final project for the Foundations of Data Science course \\(a.a. 2023/2024) }
 \author{Paolo Cursi 2155622, Tommaso Leonardi 1914546, \\Arianna Paolini 1943164, Stefano Saravalle 1948684, Pietro Signorino 2149741}
 
@@ -171,6 +173,34 @@ We leveraged the \textit{scikit-learn} Python library to implement some ML model
 We evaluated our regression models by computing the \textit{RMSE} and \textit{R2} scores, while we considered the \textit{accuracy} for our classification models.
 
 \subsection{Linear regression}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{grades_errors.png}
+    \caption{A graph showing the mean error for 10 ranges of grades}
+    \label{fig:errorGraph}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{grades_errors2.png}
+    \caption{A graph showing the mean error for 10 ranges of grades on the oversampled set}
+    \label{fig:errorGraph2}
+\end{figure}
+
+Linear regression is a simple ML model. It's a linear model so there's no risk to overfit data.
+
+We want to predict the score of a student, we use the \textit{scikit-learn LinearRegression} class (\url{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html}). It doest have any relevant hyperparameters.
+We have reached a RMSE of about 17.57 and a R2 score of 0.11 on the test set and similar values on the train set since it can't overfit data.
+As we can from Figure \ref{fig:errorGraph}, the model makes bigger mistakes when trying to predict lower scores (Figure \ref{fig:dtperf}), due to the big gap between the number of students with high and low scores that are present in the dataset. 
+
+\subsubsection{Oversampling}
+Because of that we tried to do oversampling on our dataset using the sklearn function \textit{RandomOverSampler}, now we have the same amount of data for each grade. 
+We got a RMSE of about 29.95 which is higher than the not oversampled version. As we can see on the Figure \ref{fig:errorGraph2} we have a better accuracy on the lower grades but a worst accuracy on the higher on the middle ones.
+
+
+
+
 
 
 \subsection{Decision Trees}
