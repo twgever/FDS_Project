@@ -12,6 +12,7 @@
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{subfig}
+\usepackage{placeins}
 \usepackage[colorlinks=true, allcolors=blue]{hyperref}
 
 \graphicspath{ {./figures/} }
@@ -31,7 +32,7 @@ The Open University is a public university in England that provides data about d
 
 We were interested in this dataset as it provides data about students interaction with the \textit{Virtual Learning Environmment} (\textit{VLE}), an online platform holding teaching materials and resources for the university courses. This could be an opportunity to test how much new technologies can help the learning process. That, combined with the availability of information about the social status of the students (age, gender, disability, education level, etc.) and their academic career (scores in assessment, number of studied credits, etc.) makes the Open University dataset a good choice for our purposes. \\
 
-We selected different machine learning models to implement the prediction of students scores in assessments, both in the form of a regression and a multinomial classification task (by dividing the students according to some thresholds on the score range): \textit{linear regression}, \textit{decision trees} and \textit{KNN regression} will be used for regression, \textit{logistic regression }and \textit{neural networks} for classification. Having multiple trained models for each task allow us to compare the results, determine which model performs best and try to understand why. The code of our work can be found at \url{https://github.com/twgever/FDS_Project}. %rendere pubblica
+We selected different machine learning models to implement the prediction of students scores in assessments, both in the form of a regression and a multinomial classification task (by dividing the students according to some thresholds on the score range): \textit{linear regression}, \textit{decision trees} and \textit{KNN regression} will be used for regression, \textit{logistic regression }and \textit{neural networks} for classification. Having multiple trained models for each task allows us to compare the results we get, to determine which model performs best and to try to understand why so. The code of our work can be found at \url{https://github.com/twgever/FDS_Project}. %rendere pubblica
 
 \section{Dataset}
 
@@ -64,43 +65,43 @@ The Open University Learning Analytics dataset contains data about 22 courses wi
     \item \textbf{vle}: includes data about the available materials in the VLE (html pages, pdf files, etc.); students interactions with the materials are recorded. The table contains the following columns:
     \begin{itemize}
         \item \textit{id site}: an identification number of the material;
-        \item \textit{code module }: an identification code for module;
-        \item \textit{code presentation}: an identification code of presentation;
+        \item \textit{code module }: an identification code for the module;
+        \item \textit{code presentation}: an identification code of the presentation;
         \item \textit{activity type}: the role associated with the module material;
         \item \textit{week from}: the week from which the material is planned to be used;
         \item \textit{week to}: week until which the material is planned to be used.
     \end{itemize}
 
-    \item \textbf{studentInfo}: contains demographic information about the students together with their results. The columns are:
+    \item \textbf{studentInfo}: contains demographic information about the students attending each of the modules, together with their results. The columns are:
     \begin{itemize}
         \item \textit{code module}: an identification code for a module on which the student is registered;
         \item \textit{code presentation}: the identification code of the presentation during which the student is registered on the module;
         \item \textit{id student}: a unique identification number for the student;
         \item \textit{gender}: the student’s gender;
         \item \textit{region}: identifies the geographic region, where the student lived while taking the module-presentation;
-        \item \textit{highest education}: highest student education level on entry to the module presentation;
+        \item \textit{highest education}: highest student education level on entry to the module-presentation;
         \item \textit{imd band}: specifies the \textit{Index of Multiple Depravation band} of the place where the student lived during the module-presentation;
         \item \textit{age band}: band of the student’s age;
-        \item \textit{num. of prev. attempts }: the number times the student has attempted this module;
-        \item \textit{studied credits}: the total number of credits for the modules the student is currently studying;
+        \item \textit{num. of prev. attempts }: the number of times the student has attempted this module;
+        \item \textit{studied credits}: the total number of credits for the module the student is currently studying;
         \item \textit{disability}: indicates whether the student has declared a disability;
         \item \textit{final result}: student’s final result in the module-presentation.
     \end{itemize}
 
-    \item \textbf{studentRegistration}: contains information about the time when the student registered or unregistered for the module presentation. The colums are:
+    \item \textbf{studentRegistration}: contains information about the time when the student registered or unregistered for the module-presentation. The colums are:
     \begin{itemize}
-        \item \textit{code module}: an identification code for a module;
+        \item \textit{code module}: an identification code for the module;
         \item \textit{code presentation}: the identification code of the presentation;
         \item \textit{id student}: a unique identification number for the student;
-        \item \textit{date registration}: the date of student’s registration on the module presentation, as the number of days measured relative to the start of the module-presentation (e.g. the negative value -30 means that the student registered to module presentation 30 days before it started);
-        \item \textit{date unregistration}: date of student unregistration from the module presentation (students  who completed the course have this field empty; students who unregistered have withdrawal as the value of the \textit{final result} column in the \textit{studentInfo} table).
+        \item \textit{date registration}: the date of the student’s registration to the module-presentation, as the number of days measured relative to the start of the module-presentation (e.g. the negative value -30 means that the student registered to module-presentation 30 days before it started);
+        \item \textit{date unregistration}: date of student's unregistration from the module-presentation (students  who completed the course have this field empty; students who unregistered have withdrawal as the value of the \textit{final result} column in the \textit{studentInfo} table).
     \end{itemize}
 
     \item \textbf{studentAssessment}: shows the results of students’ assessments. If the student does not submit the assessment, no result is recorded. The final exam submissions is missing if the result of the assessments is not stored in the system. It contains the following columns:
     \begin{itemize}
         \item \textit{id assessment}: the identification number of the assessment;
         \item \textit{id student}: a unique identification number for the student;
-        \item \textit{date submitted}: the date of student submission, measured as the number of days since the start of the module presentation;
+        \item \textit{date submitted}: the date of the student's submission, measured as the number of days since the start of the module-presentation;
         \item \textit{is banked}: a status flag indicating that the assessment result has been transferred from a previous presentation;
         \item \textit{score}: the student’s score in this assessment; the range is from 0 to 100. A score lower than 40 is interpreted as Fail.
     \end{itemize}
@@ -108,10 +109,10 @@ The Open University Learning Analytics dataset contains data about 22 courses wi
     \item \textbf{studentVle}: contains information about each student’s interactions with the materials in the VLE. The columns are:
     \begin{itemize}
         \item \textit{code module}: an identification code for a module;
-        \item \textit{code presentation}: the identification code of the module presentation;
+        \item \textit{code presentation}: the identification code of the module-presentation;
         \item \textit{id student}: a unique identification number for the student;
         \item \textit{id site}: an identification number for the VLE material;
-        \item \textit{date}: the date of student’s interaction with the material measured as the number of days since the start of the module-presentation;
+        \item \textit{date}: the date of the student’s interaction with the material measured as the number of days since the start of the module-presentation;
         \item \textit{sum click}: the number of times a student interacts with the material in that day.
     \end{itemize}
 
@@ -122,13 +123,13 @@ The Open University Learning Analytics dataset contains data about 22 courses wi
 
 \subsection{Feature selection}
 
-Since our goal was to predict the score of some student in any assessment during a module-presentation, we considered the \textit{score} column in the \textit{studentAssessment} table as our target variable. As for the features, we selected the columns resulting from the join of the \textit{studentInfo}, \textit{studentRegistration}, \textit{studentAssessment}, \textit{studentVle}, \textit{assessments} and \textit{vle} tables. We excluded the \textit{final result} column of \textit{studentInfo} to avoid trivializing the score prediction task and we ignored some columns that seemed less relevant to the student career (such as \textit{is banked} from \textit{studentAssessment}, \textit{date} from \textit{studentVle}, \textit{week from} and \textit{week to} from \textit{vle}).\\ 
+Since our goal was to predict the score of some student in any assessment during a module-presentation, we considered the \textit{score} column in the \textit{studentAssessment} table as our target variable. As for the features, we selected the columns resulting from the join of the \textit{studentInfo}, \textit{studentRegistration}, \textit{studentAssessment}, \textit{studentVle}, \textit{assessments} and \textit{vle} tables. We excluded the \textit{final result} column of \textit{studentInfo} to avoid trivializing the score prediction task and we ignored some columns that seemed less relevant to the student's career (such as \textit{is banked} from \textit{studentAssessment}, \textit{date} from \textit{studentVle}, \textit{week from} and \textit{week to} from \textit{vle}).\\ 
 
 While joining \textit{studentVle} and \textit{vle} we decided to aggregate the number of clicks of a student on an online resource on the VLE for some module-presentation, by considering the total sum of clicks on each different type of resource (which is specified by the \textit{activity type} attribute), in order to allow a deeper analysis on the VLE materials contribution to academic success.\\
 
-We also decided to merge together the \textit{date submitted} (from \textit{studentAssessment}) and \textit{date} (from \textit{assessments}) attributes into a single \textit{submission delay} feature, computed as the difference of the two, thus considering the time interval between the publication of an assignment and the  student submission.\\
+We also decided to merge together the \textit{date submitted} (from \textit{studentAssessment}) and \textit{date} (from \textit{assessments}) attributes into a single \textit{submission delay} feature, computed as the difference of the two, thus considering the time interval between the publication of an assignment and the  student's submission.\\
 
-After dropping the \textit{id} columns of the joined tables and deleting the rows corresponding to students with important information missing, we got a dataset of 163,387 rows × 33 columns. We normalized the features values by subtracting the mean and dividing by the standard deviation of each column, thus getting the data distribution shown in Figure \ref{fig:distr}.\\
+After dropping the \textit{id} columns of the joined tables and deleting the rows corresponding to students with important information missing, we got a dataset of 163,387 rows × 33 columns. We normalized the features values by applying z-score normalization (for each column, subtract the mean and divide by standard deviation), thus getting the data distribution shown in Figure \ref{fig:distr}.\\
 
 
 \begin{figure}
@@ -151,21 +152,17 @@ We also looked at some scatterplots expressing the relationship between each fea
 
 \begin{figure}
 \centering
-\includegraphics[width=0.4\textwidth]{scatterplots.png}
+\includegraphics[width=0.9\textwidth]{scatterplots.png}
 \caption{\label{fig:scatt}Scatterplots showing the relationship between each feature and the target variable}
 \end{figure}
 
-Finally, we observed that the dataset contains much more information about students who got high scores in assessments than about students with worse exam outcome (Figure \ref{fig:misrepr}). Although having many students with high grades is good news, this might interfere with the correct prediction of low scores. We tried to counter the problem with oversampling (Subsection \ref{subsec:oversamp}).
+Finally, we observed that the dataset contains much more information about students who got high scores in assessments than about students with worse exam outcome (Figure \ref{fig:misrepr}). Although having many students with high grades is good news, this might interfere with the correct prediction of low scores. Detection of students at risk of failing might be of interest, so we tried to counter the problem with oversampling (Section \ref{subsec:oversamp}).
 
 \begin{figure}
 \centering
 \includegraphics[width=0.6\textwidth]{misrepr.png}
-\caption{\label{fig:misrepr}A graph showing the number of training set entries for each score value}
+\caption{\label{fig:misrepr}A graph showing the number of dataset rows for each score value}
 \end{figure}
-
-\subsection{Train and test split}
-
-We chose to compute the training and test sets for our ML models by splitting the dataset with the \textit{train\_test\_split} function from the \textit{scikit-learn} library to use 80\% of the original number of samples for training (about 130,700 rows) and the remaining 20\% for testing (about 32,600 rows).
 
 \subsection{Oversampling}
 \label{subsec:oversamp}
@@ -181,12 +178,23 @@ We used the \textit{\href{https://imbalanced-learn.org/stable/references/generat
 This implementation randomly creates new data points, close to the existing ones, until every grade has the same 'presence' in the training set (Figure \ref{fig:dataset-presence-over}).
 We tested every model both with the standard training set and the oversampled one.
 
+
+\subsection{Train and test split}
+
+We chose to compute the training and test sets for our ML models by splitting the dataset with the \textit{train\_test\_split} function from the \textit{scikit-learn} library to use 80\% of the original number of samples for training (about 130,700 rows) and the remaining 20\% for testing (about 32,600 rows).
+
+\section{ML models training and testing}
+We leveraged the \textit{scikit-learn} Python library to implement some ML models for the regression and classification tasks of predicting the score of a student in a module-presentation assessment. We trained linear (\textit{linear regression}, \textit{logistic regression}) and non-linear (\textit{decision trees}, \textit{KNN}, \textit{neural networks}) models to see if there are some differences in the results they provide.\\
+
+We evaluated our regression models by computing the \textit{RMSE} and \textit{R2} scores, while we considered the \textit{accuracy} for our classification models.
+
 \section{ML models training and testing}
 We leveraged the \textit{scikit-learn} Python library to implement some ML models for the regression and classification tasks of predicting the score of a student in a module-presentation assessment. We trained linear (\textit{linear regression}, \textit{logistic regression}) and non-linear (\textit{decision trees}, \textit{KNN}, \textit{neural networks}) models to see if there are some differences in the results they provide.\\
 
 We evaluated our regression models by computing the \textit{RMSE} and \textit{R2} scores, while we considered the \textit{accuracy} for our classification models.
 
 \subsection{Linear regression}
+\FloatBarrier
 
 \begin{figure}[h]
     \centering
@@ -215,13 +223,17 @@ We got a RMSE of about 29.95 which is higher than the not oversampled version. A
 
 
 
+
+
+\FloatBarrier
+
 \subsection{Decision Trees}
 
 Decision trees are a simple ML model that should be able to deal with the non-linear relationship that some features show with the target variable. However, they might be prone to overfitting, as they are built by splitting the training samples according to their values for the most important features.\\
 
 Since we aim to predict the exact score of a student in an assessment, we use the \textit{scikit-learn} \textit{DecisionTreeRegressor} class (\url{https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeRegressor.html}). Such implementation of decision trees has many hyperparameters, but we selected \textit{min\_samples\_leaf} and \textit{min\_samples\_split} as the the most significant ones: the former determines the minimum number of samples required to be at a leaf node, the latter specifies the minimum number of samples required to split an internal node. So these parameters influence the size of the decision tree and the extent of overfitting.\\
 
-Some hyperparameters tuning (Figure \ref{fig:heatmap}) was done to find out the values that allow to reach the best performance: with \textit{min\_sample\_leaf} set to 45 and \textit{min\_sample\_split} set to any value between 5 and 50 we can reach an RMSE score of about 16.36 and an R2 score of 0.23 on the test set. Since the scores for the prediction on the train set were $RMSE = 15.01$ and $R2 = 0.36$ the model doesn't seem to overfit too much. \\
+Some hyperparameter tuning (Figure \ref{fig:heatmap}) was done to find out the values that allow to reach the best performance: with \textit{min\_sample\_leaf} set to 45 and \textit{min\_sample\_split} set to any value between 5 and 50 we can reach an RMSE score of about 16.36 and an R2 score of 0.23 on the test set. Since the scores for the prediction on the train set were $RMSE = 15.01$ and $R2 = 0.36$ the model doesn't seem to overfit too much. \\
 
 \begin{figure}%
     \centering
@@ -248,6 +260,7 @@ As we expected, the model makes bigger mistakes when trying to predict lower sco
 \caption{\label{fig:dtperf}The mean error for each real score that the model tries to predict}
 \end{figure}
 
+
 \subsection{KNN Regression}
 KNN Regression is perhaps the simplest ML model, that uses \textbf{feature similarity} to predict the values of any new data points. 
 Given an input, the model returns the mean of the values corresponding to the closest $k$ points to that input.
@@ -255,7 +268,7 @@ We used the \textit{\href{https://scikit-learn.org/stable/modules/generated/skle
 
 \subsubsection{Finding the best model}
 In order to find the best KNN Regression model for this dataset we made predictions on different models with different $k$ values. 
-We then scored every model and chose the one with the best score. The following plots show the \textit{RMSE} and \textit{R2} scores (y axis) for every model (x axis).
+We then scored every model and chose the one with the best score. The following plots (Figure \ref{fig:knn-scores}) show the \textit{RMSE} and \textit{R2} scores (y axis) for every model (x axis).
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.95\textwidth]{KNN_scores.png}
@@ -289,7 +302,6 @@ We found the best value for $k$ with this \textit{Oversampled} dataset, just lik
 \caption{\textit{RMSE} and \textit{R2} scores for every model, with \textit{Oversampled} dataset.}
 \label{fig:knn-scores-over}
 \end{figure}
-
 As shown in Figure \ref{fig:knn-scores-over} the best model is the one with $k = 2$.
 For this model we got a \textit{RMSE score} of around $17.8199$ and a \textit{R2 score} of around $0.0921$.
 \begin{figure}[ht]
@@ -300,10 +312,69 @@ For this model we got a \textit{RMSE score} of around $17.8199$ and a \textit{R2
 \end{figure}
 These scores are worse than the ones obtained predicting with the standard dataset, but effectively this model is better at predicting \textit{lower} grades (Figure \ref{fig:knn-err-over}).
 
+\FloatBarrier
 \subsection{Logistic regression}
-\subsection{Neural Networks}
 
-Neural networks are one of the most complex used model in this report.
+Logistic regression is a statistical model suited for predicting the probability of an event occurring. In our case, given an assessment $A$ and a range of grades $[a,b]$ , the event we want to predict the probability of is "$A$'s grade falls in the range $[a,b]$". 
+
+In order to work with this model, first we have to find a way to divide the assessments in the dataset in different classes. To do this, we tried different approaches, but first, let's define the notation:
+\begin{itemize}
+\item[] $C$: set of the classes. If we want to divide the students in 5 classes, $C$ will be $\{1,2,3,4,5\}$
+
+\item[] $Y$: array of target values
+
+\item[] $Y_c[i]$: array of the classes assigned to each entry in $Y$
+
+\end{itemize}
+
+$Y_c$ is such that:
+$$
+\forall i \in \{0, 1, 2, \ldots, \text{{len(Y)}}-1\}, Y_c[i] \in C
+$$
+and, if $Y_c[i] = n$, it means that $Y[i]$ belongs to class $n$
+
+Now we can define the different ways in which we can divide the dataset:
+
+\begin{itemize}
+    \item \textbf{uniform grades}: divide the total range of grades uniformly, so $Y_c$ is to be assigned as follows:
+
+    $$
+Y_c[i]=\left\lceil\frac{Y[i]-\min{Y}}{\frac{\max{Y}-\min{Y}}{\lvert C\rvert}}\right\rceil
+$$
+
+suppose we want 5 classes, assessments whose grade falls in the range $[0,20]$ will be assigned to class $1$, those associated to range $[20,40]$ will be assigned to class 2, and so on. 
+
+Due to the previously highlighted underrepresentation problem, this division results in heavily imbalanced classes, with fewer examples for classes representing worse grades and more examples for other classes.
+
+ \item \textbf{uniform classes} : divide the dataset such that the resulting classes will have the same number of examples.
+
+ Let $Y_{sort}$ be the sorted version of $Y$, and let $Y_{index}$ be the array of the assigned position for each value in $Y$ in its sorted version $Y_{sort}$:
+$$
+(Y[i]=v \land Y_{index}[i]= j ) \Rightarrow Y_{sort}[j]=v
+$$
+Then, $Y_c$ is assigned as follows:
+$$
+Y_c[i]=\left\lceil \frac{Y_{index}[i]}{\frac{len(Y)}{\lvert C \rvert}} \right\rceil
+$$
+
+\item \textbf{uniform contribution}: divide the dataset such that the sum of the grades for each class's examples is the same. $Y_c$ is then assigned as follows: $$
+Y_c[i]=\left\lceil \frac{\sum\limits_{j\leq i} Y_{sort}[j]}{\frac{\sum\limits_j Y[j]}{\lvert C \rvert}} \right\rceil
+$$
+
+\item \textbf{fail/pass}: Divide the dataset in 2 classes. For each example, the assigned class reflects whether the assessment is successful (grade is above 40) or a failure (grade is lower or equal to 40).
+$$
+Y_c[i]= \min{[1,\left\lfloor \frac{Y[i]}{40} \right\rfloor ]} +1
+$$
+
+\end{itemize}
+
+It is important to notice that \textbf{uniform classes} and \textbf{uniform contribution}, while exhibiting more balanced classes, 
+we took advantage of \textit{scikit-learn}'s \textit{LogisticRegression} class
+
+\subsection{Neural Networks}
+\FloatBarrier
+
+Neural networks are one of the most complex models in this report.
 The first thing that we did was to choose a good network topology, and for this reason we tried with many different layers.
 
 We found that the network physical composition wasn't this important for the predictions, since each of the attempts produced more or less the same 
