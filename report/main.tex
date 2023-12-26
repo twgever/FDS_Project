@@ -155,17 +155,31 @@ We also looked at some scatterplots expressing the relationship between each fea
 \caption{\label{fig:scatt}Scatterplots showing the relationship between each feature and the target variable}
 \end{figure}
 
-Finally, we observed that the dataset contains much more information about students who got high scores in assessments than about students with worse exam outcome (Figure \ref{fig:misrepr}). Although having many students with high grades is good news, this might interfere with the correct prediction of low scores. We tried to counter the problem with oversampling (Section \ref{sec:oversamp}).
+Finally, we observed that the dataset contains much more information about students who got high scores in assessments than about students with worse exam outcome (Figure \ref{fig:misrepr}). Although having many students with high grades is good news, this might interfere with the correct prediction of low scores. We tried to counter the problem with oversampling (Subsection \ref{subsec:oversamp}).
 
 \begin{figure}
 \centering
 \includegraphics[width=0.6\textwidth]{misrepr.png}
-\caption{\label{fig:misrepr}A graph showing the number of dataset rows for each score value}
+\caption{\label{fig:misrepr}A graph showing the number of training set entries for each score value}
 \end{figure}
 
 \subsection{Train and test split}
 
 We chose to compute the training and test sets for our ML models by splitting the dataset with the \textit{train\_test\_split} function from the \textit{scikit-learn} library to use 80\% of the original number of samples for training (about 130,700 rows) and the remaining 20\% for testing (about 32,600 rows).
+
+\subsection{Oversampling}
+\label{subsec:oversamp}
+As we discussed earlier, the training set and the dataset itselfs are heavily imbalanced (Figure \ref{fig:misrepr}), containing more \textit{higher grade} entries than \textit{lower grade} ones.
+We tried solving this problem by \textit{Oversampling} the \textbf{training} data.
+We used the \textit{\href{https://imbalanced-learn.org/stable/references/generated/imblearn.over_sampling.RandomOverSampler.html}{imbalanced-learn}}'s \textit{RandomOverSampler} implementation.
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.6\textwidth]{dataset-presence-over.png}
+    \caption{Grade presence in the training set after \textit{Oversampling}.}
+    \label{fig:dataset-presence-over}
+\end{figure}
+This implementation randomly creates new data points, close to the existing ones, until every grade has the same 'presence' in the training set (Figure \ref{fig:dataset-presence-over}).
+We tested every model both with the standard training set and the oversampled one.
 
 \section{ML models training and testing}
 We leveraged the \textit{scikit-learn} Python library to implement some ML models for the regression and classification tasks of predicting the score of a student in a module-presentation assessment. We trained linear (\textit{linear regression}, \textit{logistic regression}) and non-linear (\textit{decision trees}, \textit{KNN}, \textit{neural networks}) models to see if there are some differences in the results they provide.\\
@@ -197,8 +211,6 @@ As we can from Figure \ref{fig:errorGraph}, the model makes bigger mistakes when
 \subsubsection{Oversampling}
 Because of that we tried to do oversampling on our dataset using the sklearn function \textit{RandomOverSampler}, now we have the same amount of data for each grade. 
 We got a RMSE of about 29.95 which is higher than the not oversampled version. As we can see on the Figure \ref{fig:errorGraph2} we have a better accuracy on the lower grades but a worst accuracy on the higher on the middle ones.
-
-
 
 
 
@@ -237,6 +249,57 @@ As we expected, the model makes bigger mistakes when trying to predict lower sco
 \end{figure}
 
 \subsection{KNN Regression}
+KNN Regression is perhaps the simplest ML model, that uses \textbf{feature similarity} to predict the values of any new data points. 
+Given an input, the model returns the mean of the values corresponding to the closest $k$ points to that input.
+We used the \textit{\href{https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html}{scikit-learn}} implementation.
+
+\subsubsection{Finding the best model}
+In order to find the best KNN Regression model for this dataset we made predictions on different models with different $k$ values. 
+We then scored every model and chose the one with the best score. The following plots show the \textit{RMSE} and \textit{R2} scores (y axis) for every model (x axis).
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\textwidth]{KNN_scores.png}
+\caption{\textit{RMSE} and \textit{R2} scores for every model.}
+\label{fig:knn-scores}
+\end{figure}
+We only analyzed models with $k = 1, \ldots, 10$.
+Analyzing models with $k > 10$ would be useless, since increasing $k$ will make the model underfit the data, hence the scores will keep getting worse.
+The best model for this data is the one with $k = 4$.
+For this model we got a \textit{RMSE score} of around $15.9325$ and a \textit{R2 score} of around $0.2742$.
+These scores are better than the previously analyzed ML models.
+
+\subsubsection{Analyzing the results}
+We want to find out if the model is better at predicting some grades than others.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.5\textwidth]{KNN_errs_class.png}
+\caption{Mean predictions error for grade classes.}
+\label{fig:knn-err}
+\end{figure}
+The plot in the Figure \ref{fig:knn-err} shows the mean error of the model predictions (y axis), for $10$ range of grades (x axis).
+Looking at the plot it's clear that the model is better at predicting \textit{higher} grades than \textit{lower} ones.
+This behaviour was expected, since the dataset is heavily imbalanced and contains few \textit{low} grades.
+
+\subsubsection{Oversampling}
+As previously mentioned we tried \textit{Random Oversampling} in order to solve the imbalance problem of the dataset.
+We found the best value for $k$ with this \textit{Oversampled} dataset, just like we did in the normal one.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\textwidth]{KNN_scores_over.png}
+\caption{\textit{RMSE} and \textit{R2} scores for every model, with \textit{Oversampled} dataset.}
+\label{fig:knn-scores-over}
+\end{figure}
+
+As shown in Figure \ref{fig:knn-scores-over} the best model is the one with $k = 2$.
+For this model we got a \textit{RMSE score} of around $17.8199$ and a \textit{R2 score} of around $0.0921$.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.5\textwidth]{KNN_errs_class_over.png}
+\caption{Mean predictions error for grade classes, with \textit{Oversampled} dataset}
+\label{fig:knn-err-over}
+\end{figure}
+These scores are worse than the ones obtained predicting with the standard dataset, but effectively this model is better at predicting \textit{lower} grades (Figure \ref{fig:knn-err-over}).
+
 \subsection{Logistic regression}
 \subsection{Neural Networks}
 
@@ -308,8 +371,6 @@ are higher than forty.
     \caption{\label{fig:binary_summary}Summary of the results in binary classification.}
 \end{figure}
 
-\section{Oversampling}
-\label{sec:oversamp}
 \section{Results analysis}
 \section{Roles of team members}
 We worked together on the dataset choice, data preprocessing and analysis, then each of us focused on a different ML model: 
