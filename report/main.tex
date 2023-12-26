@@ -209,6 +209,75 @@ As we expected, the model makes bigger mistakes when trying to predict lower sco
 \subsection{KNN Regression}
 \subsection{Logistic regression}
 \subsection{Neural Networks}
+
+Neural networks are one of the most complex used model in this report.
+The first thing that we did was to choose a good network topology, and for this reason we tried with many different layers.
+
+We found that the network physical composition wasn't this important for the predictions, since each of the attempts produced more or less the same 
+result, so, to mantain things at a simple and manageable state, we opt for a very simple network, with just two layers and an actiavtion function 
+(ReLU) in between.
+
+The first layer had the numbers of features in input, and in output it had the same number multiplied by two. The last layer had the duty
+to predict the number of classes, so either ten or two in our experiments.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{nn_architecture.png}
+    \caption{\label{fig:nn}The neural network architecture we used.}
+\end{figure}
+
+Since we want to predict, given the features of a student, the probability that he is gonna fall in the ranges of score we have defined, outside the last layer there is a \emph{Softmax function}, which is in charge
+of parsing the outputs in probabilities. 
+Understood what we said until this point, it's obvious that the loss function could not be anything other than a \emph{Cross-Entopy}.
+
+Regarding the training, it was done using the following hyperparameters:
+
+\begin{itemize}
+    \item Defined our custom dataset, we used a \textbf{batch size} of 16.
+    \item We choose a maximum of \textbf{100 epochs}, even if we didn't ever reached the limit in the training as we are gonna explain later on.
+    \item We tried different \textbf{learning rates}, ranging from $10^{-1}$ to $10^{-5}$.
+\end{itemize}
+
+The train was done with the idea of stopping it when the loss was less than $5 \times 10^{-5}$. It can be clearly seen from the following graphs, that the training was almost every time stopped earlier,
+especially for the smallest learning rates, that made the network change a very little for each epoch.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{lr_training.png}
+    \caption{\label{fig:lr}The training we did with the different learning rates.}
+\end{figure}
+
+To provide a summary about what we said until now, we can look at the following graph:
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{results.png}
+    \caption{\label{fig:summary}Summary about precisions.}
+\end{figure}
+
+The dataset chosen was afflicted by a misrepresentation problem, with more student obtaining good results and less with lower scores. For this motivation, we tried to narrow down the number of classes,
+trying with just two, so higher than forty or lower.
+
+We also changed the structure of the network, replacing the Softmax with a \emph{Sigmoid function}.
+
+Here we can look at the results:
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{binary_lr.jpg}
+    \caption{\label{fig:binary_lr}Training with different learning rates with binary classification}
+\end{figure}
+
+And here we can see the following graph providing a summary on the results obtained. The misrepresentation problem appears again, 
+for this motivation, the network just has to predict a value closer to one, rather than learning from the features, since a lots of examples in the dataset
+are higher than forty.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{binary_results.png}
+    \caption{\label{fig:binary_summary}Summary of the results in binary classification.}
+\end{figure}
+
 \section{Oversampling}
 \label{sec:oversamp}
 \section{Results analysis}
