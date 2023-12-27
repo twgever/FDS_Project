@@ -195,12 +195,11 @@ We evaluated our regression models by computing the \textit{RMSE} and \textit{R2
 
 \subsection{Linear regression}
 \FloatBarrier
-Linear regression is a simple ML model. It's a linear model so there's no risk to overfit data.
+Linear regression is a simple ML model. This type of model should not overfit since we have a large amount of data compared to the number of features.
 
 We want to predict the score of a student, we use the \textit{scikit-learn LinearRegression} class (\url{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html}). It doest have any relevant hyperparameters.
-We have reached a RMSE of about 17.57 and a R2 score of 0.11 on the test set and similar values on the train set since it can't overfit data.
-As we can from Figure \ref{fig:errorGraph}, the model makes bigger mistakes when trying to predict lower scores (Figure \ref{fig:dtperf}), due to the big gap between the number of students with high and low scores that are present in the dataset. 
-
+We have reached a RMSE of about 17.57 and a R2 score of 0.11 on the test set and similar values on the train set.
+As we can from Figure \ref{fig:errorGraph}, the model makes better predictions on higher grades, since the more presence of higher grades in the dataset make the hyperplane approximate those better than lower. 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.6\textwidth]{grades_errors.png}
