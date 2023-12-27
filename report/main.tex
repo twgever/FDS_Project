@@ -39,7 +39,7 @@ We selected different machine learning models to implement the prediction of stu
 
 \section{Dataset}
 
-\begin{figure}
+\begin{figure}[h!]
 \centering
 \includegraphics[width=0.7\textwidth]{database.png}
 \caption{\label{fig:dataset}The organization of the tables in the Open University Learning Analytics dataset (\url{https://analyse.kmi.open.ac.uk/open_dataset})}
@@ -135,7 +135,7 @@ We also decided to merge together the \textit{date submitted} (from \textit{stud
 After dropping the \textit{id} columns of the joined tables and deleting the rows corresponding to students with important information missing, we got a dataset of 163,387 rows × 33 columns. We normalized the features values by applying \textit{z-score normalization} (for each column, subtract the mean and divide by standard deviation), thus getting the data distribution shown in Figure \ref{fig:distr}.\\
 
 
-\begin{figure}
+\begin{figure}[h!]
 \centering
 \includegraphics[width=0.7\textwidth]{data_distribution.png}
 \caption{\label{fig:distr}Histograms showing the data distribution in our dataset}
@@ -145,15 +145,16 @@ After dropping the \textit{id} columns of the joined tables and deleting the row
 
 We computed the correlation matrix for the features of the dataset (Figure \ref{fig:corrmatr}) and observed that there exist some positive correlation between the clicks on different types of online resources (e.g. \textit{homepage clicks} and \textit{forumng clicks}, \textit{questionnaire clicks} and \textit{dataplus clicks} or \textit{oucontent clicks}), probably because they are often accessed sequentially during a single VLE session. There is also a slight negative correlation between the \textit{submission delay} and the number of clicks on some type of resources (e.g. \textit{oucontent}, \textit{quiz}, \textit{questionnaire}), suggesting that a student who is active on the VLE is more likely to submit an assignement with a small delay than a student who don't access online materials.\\
 
-\begin{figure}
+\begin{figure}[h!]
 \centering
 \includegraphics[width=0.8\textwidth]{correlationmatrix.png}
 \caption{\label{fig:corrmatr}Correlation matrix for the dataset features}
 \end{figure}
 
 We also looked at some scatterplots expressing the relationship between each feature and the target variable (Figure \ref{fig:scatt}), noticing that in some cases the feature don't seem to influence the score value (e.g. \textit{gender}, \textit{region}, \textit{imd band}), whereas other plots show that bigger feature values are associated to larger scores (e.g. \textit{num. of prev. attempts}, \textit{forumng clicks}, \textit{questionnaire clicks}). We count on the latter type of features for the effectiveness of our linear ML models.\\
+\newpage
 
-\begin{figure}
+\begin{figure}[h!]
 \centering
 \includegraphics[width=0.43\textwidth]{scatterplots.png}
 \caption{\label{fig:scatt}Scatterplots showing the relationship between each feature and the target variable}
@@ -161,7 +162,7 @@ We also looked at some scatterplots expressing the relationship between each fea
 
 Finally, we observed that the dataset contains much more information about students who got high scores in assessments than about students with worse exam outcome (Figure \ref{fig:misrepr}). Although having many students with high grades is good news, this might interfere with the correct prediction of low scores. Detection of students at risk of failing might be of interest, so we tried to counter the problem with oversampling (Section \ref{subsec:oversamp}).
 
-\begin{figure}
+\begin{figure}[h!]
 \centering
 \includegraphics[width=0.6\textwidth]{misrepr.png}
 \caption{\label{fig:misrepr}A graph showing the number of dataset rows for each score value}
@@ -178,6 +179,7 @@ We used the \textit{\href{https://imbalanced-learn.org/stable/references/generat
     \caption{Grade presence in the training set after \textit{Oversampling}}
     \label{fig:dataset-presence-over}
 \end{figure}
+\newpage
 This implementation randomly creates new data points, close to the existing ones, until every grade has the same 'presence' in the training set (Figure \ref{fig:dataset-presence-over}).
 We tested every model both with the standard training set and the oversampled one.
 
@@ -199,19 +201,20 @@ We want to predict the score of a student, we use the \textit{scikit-learn Linea
 We have reached a RMSE of about 17.57 and a R2 score of 0.11 on the test set and similar values on the train set since it can't overfit data.
 As we can from Figure \ref{fig:errorGraph}, the model makes bigger mistakes when trying to predict lower scores (Figure \ref{fig:dtperf}), due to the big gap between the number of students with high and low scores that are present in the dataset. 
 
-\begin{figure}[h]
+\begin{figure}[h!]
     \centering
     \includegraphics[width=0.6\textwidth]{grades_errors.png}
     \caption{A graph showing the mean error for 10 ranges of grades}
     \label{fig:errorGraph}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[h!]
     \centering
     \includegraphics[width=0.6\textwidth]{grades_errors2.png}
     \caption{A graph showing the mean error for 10 ranges of grades on the oversampled set}
     \label{fig:errorGraph2}
 \end{figure}
+\newpage
 
 
 \subsubsection{Oversampling}
@@ -251,6 +254,7 @@ By visualizing the first levels of the decision tree with the best hyperparamete
 \includegraphics[width=1.0\textwidth]{DTstructure.png}
 \caption{\label{fig:dtstruct}The first 4 levels of the DecisionTreeRegressor with \textit{min\_sample\_leaf} set to 45 and \textit{min\_sample\_split} set to 10}
 \end{figure}
+\newpage
 
 As we expected, the model makes bigger mistakes when trying to predict lower scores (Figure \ref{fig:dtperf}): we can see that it reaches a peak of 80 points of difference from the target value when it is in the grade interval from 0 to 20, then the error starts to decrease until getting to reasonable values for target grades above 50, for which it ranges from -20 to +20. This situation is probably due to the big gap between the number of students with high and low scores that are present in the dataset. To mitigate this problem, we tried training the model on an oversampled training set (Section \ref{subsec:oversamp}).
 
@@ -388,7 +392,7 @@ It is important to notice that \textbf{UnCl} and \textbf{UnCo}, while exhibiting
 As for the implementation of the logistic regression model, we took advantage of \textit{scikit-learn}'s {\href{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html}{LogisticRegression}} class. It allows to specify a number of parameters (\textit{penalty},\textit{class\_weight},\textit{solver},...), none of which heavily influences the results that we obtained.
 
 By applying such model to the data as it is, we get the confusion matrices in figure \ref{fig:CMnoOS}
-\begin{figure}[h]
+\begin{figure}[h!]
     \includegraphics[width=.24\textwidth]{UnRa0.png}
     \includegraphics[width=.24\textwidth]{UnCl0.png}
     \includegraphics[width=.24\textwidth]{UnGr0.png}
@@ -401,7 +405,7 @@ As expected, without any kind of precautionary measure on the class imbalance, w
 
 With the objective of mitigating the effect of the class imbalance, we execute oversampling on the dataset via the {\href{https://imbalanced-learn.org/stable/references/generated/imblearn.over_sampling.RandomOverSampler.html}{RandomOverSampler}} class from \textit{imbalanced-learn}, which naively oversamples the data by picking samples at random with replacement. Thus we get the results in figure \ref{fig:CMwOS}
 
-\begin{figure}[h]
+\begin{figure}[h!]
     \includegraphics[width=.24\textwidth]{UnRa1.png}
     \includegraphics[width=.24\textwidth]{UnCl1.png}
     \includegraphics[width=.24\textwidth]{UnGr1.png}
@@ -415,7 +419,7 @@ While \textit{UnCl} and \textit{UnCo} don't seem to benefit much from oversampli
 \subsubsection{Results}
 
 In this section, we may observe some of the results obtained through our analysis. We evaluated the performance of logistic regression not only for the dataset as it is and on the randomly oversampled dataset, but also on a dataset oversampled via SMOTE (an oversampling technique that generates new synthetic data) and on a dataset enriched with polynomial features (thanks to \textit{scikit-learn}'s {\href{https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.PolynomialFeatures.html}{PolynomialFeatures}} class).
-\begin{table}[h]
+\begin{table}[h!]
   \centering
   \begin{tabular}{|p{3cm}|c|c|c|c|c|c|c|c|c|c|c|c|c|}
     \hline
@@ -458,7 +462,7 @@ In this section, we may observe some of the results obtained through our analysi
   \label{tab:EvMetMultireg}
 \end{table}
 
-\begin{table}[h]
+\begin{table}[h!]
   \centering
   \begin{tabular}{|p{3cm}|c|c|c|c|c|}
     \hline
@@ -495,7 +499,7 @@ result, so, to mantain things at a simple and manageable state, we opt for a ver
 The first layer had the numbers of features in input, and in output it had the same number multiplied by two. The last layer had the duty
 to predict the number of classes, so either ten or two in our experiments.
 
-\begin{figure}
+\begin{figure}[h!]
     \centering
     \includegraphics[width=0.5\textwidth]{nn_architecture.png}
     \caption{\label{fig:nn}The neural network architecture we used.}
@@ -513,18 +517,19 @@ Regarding the training, it was done using the following hyperparameters:
     \item We tried different \textbf{learning rates}, ranging from $10^{-1}$ to $10^{-5}$.
 \end{itemize}
 
-The train was done with the idea of stopping it when the loss was less than $5 \times 10^{-5}$. It can be clearly seen from the following graphs, that the training was almost every time stopped earlier,
+The training was done with the idea of stopping it when the loss was less than $5 \times 10^{-5}$. It can be clearly seen from the following graphs, that the training was almost every time stopped earlier,
 especially for the smallest learning rates, that made the network change a very little for each epoch.
 
-\begin{figure}
+\begin{figure}[h!]
     \centering
     \includegraphics[width=0.5\textwidth]{lr_training.png}
     \caption{\label{fig:lr}The training we did with the different learning rates.}
 \end{figure}
 
-To provide a summary about what we said until now, we can look at the following graph:
+To provide a summary about what we said until now, we can look at the following graph, that represent the accuracy of the various models trained 
+with the different learning rates on the test set:
 
-\begin{figure}
+\begin{figure}[h!]
     \centering
     \includegraphics[width=0.5\textwidth]{results.png}
     \caption{\label{fig:summary}Summary about precisions.}
@@ -537,23 +542,117 @@ We also changed the structure of the network, replacing the Softmax with a \emph
 
 Here we can look at the results:
 
-\begin{figure}
+\begin{figure}[h!]
     \centering
     \includegraphics[width=0.5\textwidth]{binary_lr.jpg}
     \caption{\label{fig:binary_lr}Training with different learning rates with binary classification}
 \end{figure}
 
-And here we can see the following graph providing a summary on the results obtained. The misrepresentation problem appears again, 
+And here we can see the following graph providing a summary on the results obtained on the test set. The misrepresentation problem appears again, 
 for this motivation, the network just has to predict a value closer to one, rather than learning from the features, since a lots of examples in the dataset
 are higher than forty.
 
-\begin{figure}
+\begin{figure}[h!]
     \centering
     \includegraphics[width=0.5\textwidth]{binary_results.png}
     \caption{\label{fig:binary_summary}Summary of the results in binary classification.}
 \end{figure}
 
+\subsubsection{Oversampling}
+
+As it was said before in this report and in this section, the dataset was afflicted by a misrepresentation problem. Done the oversampling, we 
+tried to run again our models on the new created dataset.
+
+In this case, the hyperparameters remained the same and we just changed the \emph{batch size} to 64, since the dataset was larger and a value
+too small would have taken a lot of time for completing the training.
+
+For the classification with ten classes we obtained:
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\textwidth]{nn_oversampling.png}
+    \caption{\label{fig:train_oversampling}Training with oversampling.}
+\end{figure}
+
+And regarding the precision on the test dataset we had:
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\textwidth]{precision_oversampling_nn.png}
+    \caption{\label{fig:acc_oversampling}Accuracy on test dataset with training done using oversampled data}
+\end{figure}
+
+We can see that the accuracy doesn't get any higher even with oversampling. It could be speculated that the oversampling on the training data
+do not solve the problem of misrepresentation in the test set, and for this motivation, the network cannot perform very well.
+
+In the case of binary classification, now that the problem is not trivial, we can look at those new results. Since the problem got slighly more complex,
+the accuracies all decreased, both for the training and for the testing:
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\textwidth]{binary_nn_oversampling.png}
+    \caption{\label{fig:binary_train_oversampling}Training with oversampling and 2 classes.}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\textwidth]{precision_binary_oversampling_nn.png}
+    \caption{\label{fig:binary_precision_oversampling}Precision with oversampling and 2 classes on test set.}
+\end{figure}
+\newpage
+
+
 \section{Results analysis}
+To give a final comprehensive view on what we did and discussed in this report, we provide the following tables with the results for each ML model an technique used:
+
+\subsection{Without oversampling}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{l|l|l|}
+    \cline{2-3}
+                                            & RMSE  & R2   \\ \hline
+    \multicolumn{1}{|l|}{Linear Regression} & 17.57 & 0.11 \\ \hline
+    \multicolumn{1}{|l|}{Decision Trees}    & 16.36 & 0.23 \\ \hline
+    \multicolumn{1}{|l|}{KNN}               & 15.93 & 0.27 \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{l|l|l|}
+    \cline{2-3}
+                                              & Accuracy (10 classes) & Accuracy (2 classes) \\ \hline
+    \multicolumn{1}{|l|}{Logistic Regression} & 0.32                  & 0.96                 \\ \hline
+    \multicolumn{1}{|l|}{Neural Networks}     & 0.353                 & 0.95                 \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{With oversampling}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{l|l|l|}
+    \cline{2-3}
+                                            & RMSE  & R2   \\ \hline
+    \multicolumn{1}{|l|}{Linear Regression} & 29.95 & ---  \\ \hline
+    \multicolumn{1}{|l|}{Decision Trees}    & 15.49 & 0.31 \\ \hline
+    \multicolumn{1}{|l|}{KNN}               & 17.82 & 0.09 \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{l|l|l|}
+    \cline{2-3}
+                                              & Accuracy (10 classes) & Accuracy (2 classes) \\ \hline
+    \multicolumn{1}{|l|}{Logistic Regression} & ---                  & ---                 \\ \hline
+    \multicolumn{1}{|l|}{Neural Networks}     & 0.25                 & 0.91                \\ \hline
+\end{tabular}
+\end{table}
+
+
+
 \section{Roles of team members}
 We worked together on the dataset choice, data preprocessing and analysis, then each of us focused on a different ML model: 
 \begin{itemize}
