@@ -45,7 +45,7 @@ We selected different machine learning models to implement the prediction of stu
 \caption{\label{fig:dataset}The organization of the tables in the Open University Learning Analytics dataset (\url{https://analyse.kmi.open.ac.uk/open_dataset})}
 \end{figure}
 
-The Open University Learning Analytics dataset contains data about 22 courses with 32,593 registered students \cite{dataset}. It is organized in seven relational tables, as show in Figure \ref{fig:dataset}:
+The Open University Learning Analytics dataset contains data about 22 courses with 32,593 registered students \cite{dataset}. It is organized in seven relational tables, as shown in Figure \ref{fig:dataset}:
 \begin{itemize}
     \item \textbf{courses}: includes the list of all available courses (which are called \textit{modules}) and their \textit{presentations} (i.e. the occurence of a course in a specific academic year). The columns are:
     \begin{itemize}
@@ -61,7 +61,7 @@ The Open University Learning Analytics dataset contains data about 22 courses wi
         \item \textit{id assessment}: identification number of the assessment;
         \item \textit{assessment type}: type of assessment, it can be: Tutor Marked Assessment (TMA), Computer Marked Assessment (CMA) or Final Exam (Exam);
         \item \textit{date}: information about the final submission date of the assessment calculated as the number of days since the start of the module-presentation (the starting date of the presentation has number 0);
-        \item \textit{weight}: weight of the assessment in percentage: final exams are treated separately and have weight 100\%, the sum of all other assessments is 100\%.  
+        \item \textit{weight}: weight of the assessment in percentage; final exams are treated separately and have weight 100\%, the sum of all other assessments is 100\%.  
     \end{itemize}
     
     
@@ -132,7 +132,7 @@ While joining \textit{studentVle} and \textit{vle} we decided to aggregate the n
 
 We also decided to merge together the \textit{date submitted} (from \textit{studentAssessment}) and \textit{date} (from \textit{assessments}) attributes into a single \textit{submission delay} feature, computed as the difference of the two, thus considering the time interval between the publication of an assignment and the  student's submission.\\
 
-After dropping the \textit{id} columns of the joined tables and deleting the rows corresponding to students with important information missing, we got a dataset of 163,387 rows × 33 columns. We normalized the features values by applying z-score normalization (for each column, subtract the mean and divide by standard deviation), thus getting the data distribution shown in Figure \ref{fig:distr}.\\
+After dropping the \textit{id} columns of the joined tables and deleting the rows corresponding to students with important information missing, we got a dataset of 163,387 rows × 33 columns. We normalized the features values by applying \textit{z-score normalization} (for each column, subtract the mean and divide by standard deviation), thus getting the data distribution shown in Figure \ref{fig:distr}.\\
 
 
 \begin{figure}
@@ -155,7 +155,7 @@ We also looked at some scatterplots expressing the relationship between each fea
 
 \begin{figure}
 \centering
-\includegraphics[width=0.9\textwidth]{scatterplots.png}
+\includegraphics[width=0.43\textwidth]{scatterplots.png}
 \caption{\label{fig:scatt}Scatterplots showing the relationship between each feature and the target variable}
 \end{figure}
 
@@ -175,7 +175,7 @@ We used the \textit{\href{https://imbalanced-learn.org/stable/references/generat
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.6\textwidth]{dataset-presence-over.png}
-    \caption{Grade presence in the training set after \textit{Oversampling}.}
+    \caption{Grade presence in the training set after \textit{Oversampling}}
     \label{fig:dataset-presence-over}
 \end{figure}
 This implementation randomly creates new data points, close to the existing ones, until every grade has the same 'presence' in the training set (Figure \ref{fig:dataset-presence-over}).
@@ -193,6 +193,11 @@ We evaluated our regression models by computing the \textit{RMSE} and \textit{R2
 
 \subsection{Linear regression}
 \FloatBarrier
+Linear regression is a simple ML model. It's a linear model so there's no risk to overfit data.
+
+We want to predict the score of a student, we use the \textit{scikit-learn LinearRegression} class (\url{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html}). It doest have any relevant hyperparameters.
+We have reached a RMSE of about 17.57 and a R2 score of 0.11 on the test set and similar values on the train set since it can't overfit data.
+As we can from Figure \ref{fig:errorGraph}, the model makes bigger mistakes when trying to predict lower scores (Figure \ref{fig:dtperf}), due to the big gap between the number of students with high and low scores that are present in the dataset. 
 
 \begin{figure}[h]
     \centering
@@ -208,11 +213,6 @@ We evaluated our regression models by computing the \textit{RMSE} and \textit{R2
     \label{fig:errorGraph2}
 \end{figure}
 
-Linear regression is a simple ML model. It's a linear model so there's no risk to overfit data.
-
-We want to predict the score of a student, we use the \textit{scikit-learn LinearRegression} class (\url{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html}). It doest have any relevant hyperparameters.
-We have reached a RMSE of about 17.57 and a R2 score of 0.11 on the test set and similar values on the train set since it can't overfit data.
-As we can from Figure \ref{fig:errorGraph}, the model makes bigger mistakes when trying to predict lower scores (Figure \ref{fig:dtperf}), due to the big gap between the number of students with high and low scores that are present in the dataset. 
 
 \subsubsection{Oversampling}
 Because of that we tried to do oversampling on our dataset using the sklearn function \textit{RandomOverSampler}, now we have the same amount of data for each grade. 
@@ -227,13 +227,14 @@ We got a RMSE of about 29.95 which is higher than the not oversampled version. A
 
 \subsection{Decision Trees}
 
-Decision trees are a simple ML model that should be able to deal with the non-linear relationship that some features show with the target variable. However, they might be prone to overfitting, as they are built by splitting the training samples according to their values for the most important features.\\
+Decision trees are a simple ML model that should be able to deal with the non-linear relationship that some features show with the target variable. However, they might be prone to overfitting, as they are built by splitting the training samples according to their values for the most important features.
 
+\subsubsection{Hyperparameter tuning}
 Since we aim to predict the exact score of a student in an assessment, we use the \textit{scikit-learn} \textit{DecisionTreeRegressor} class (\url{https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeRegressor.html}). Such implementation of decision trees has many hyperparameters, but we selected \textit{min\_samples\_leaf} and \textit{min\_samples\_split} as the the most significant ones: the former determines the minimum number of samples required to be at a leaf node, the latter specifies the minimum number of samples required to split an internal node. So these parameters influence the size of the decision tree and the extent of overfitting.\\
 
 Some hyperparameter tuning (Figure \ref{fig:heatmap}) was done to find out the values that allow to reach the best performance: with \textit{min\_sample\_leaf} set to 45 and \textit{min\_sample\_split} set to any value between 5 and 50 we can reach an RMSE score of about 16.36 and an R2 score of 0.23 on the test set. Since the scores for the prediction on the train set were $RMSE = 15.01$ and $R2 = 0.36$ the model doesn't seem to overfit too much. \\
 
-\begin{figure}%
+\begin{figure}[h!]%
     \centering
     \subfloat[\centering RMSE heatmap]{{\includegraphics[width=7cm]{DTheatmap1.png} }}%
     \qquad
@@ -242,22 +243,34 @@ Some hyperparameter tuning (Figure \ref{fig:heatmap}) was done to find out the v
     \label{fig:heatmap}%
 \end{figure}
 
+\subsubsection{Result analysis}
 By visualizing the first levels of the decision tree with the best hyperparameters values (Figure \ref{fig:dtstruct}) we understand that the features that are more relevant to the score prediction are \textit{assessment type}, \textit{homepage clicks}, \textit{weight}, \textit{submission delay}, \textit{quiz clicks}, \textit{subpage clicks}, as they are the first features chosen to split the train set on. \\
 
-\begin{figure}
+\begin{figure}[h!]
 \centering
 \includegraphics[width=1.0\textwidth]{DTstructure.png}
 \caption{\label{fig:dtstruct}The first 4 levels of the DecisionTreeRegressor with \textit{min\_sample\_leaf} set to 45 and \textit{min\_sample\_split} set to 10}
 \end{figure}
 
-As we expected, the model makes bigger mistakes when trying to predict lower scores (Figure \ref{fig:dtperf}), due to the big gap between the number of students with high and low scores that are present in the dataset. 
+As we expected, the model makes bigger mistakes when trying to predict lower scores (Figure \ref{fig:dtperf}): we can see that it reaches a peak of 80 points of difference from the target value when it is in the grade interval from 0 to 20, then the error starts to decrease until getting to reasonable values for target grades above 50, for which it ranges from -20 to +20. This situation is probably due to the big gap between the number of students with high and low scores that are present in the dataset. To mitigate this problem, we tried training the model on an oversampled training set (Section \ref{subsec:oversamp}).
 
-\begin{figure}
+\begin{figure}[h!]
 \centering
 \includegraphics[width=0.5\textwidth]{DTnew.png}
 \caption{\label{fig:dtperf}The mean error for each real score that the model tries to predict}
 \end{figure}
 
+
+\subsubsection{Oversampling}
+By training the \textit{DecisionTreeRegressor} with the previously mentioned hyperparameters values on the oversampled training set obtained with \textit{Random Oversampling}, we get an \textit{RMSE score} of about 15.49 and an \textit{R2 score} of 0.31. So the performance of the model is slightly improved, with an RMSE decrease of 0.87 and an R2 increase of 0.08 compared to the results we got with the standard training set.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.5\textwidth]{DToversamp.png}
+\caption{\label{fig:dtperfover}The mean error for each real score of the model trained on the oversampled set}
+\end{figure}
+
+In Figure \ref{fig:dtperfover} we see that the mean error is now almost evenly distributed across the target grades (ranging from -10 to +10), although there is a tendency of overestimating low scores and underestimating high ones, with a negative peak on the maximum score, for which an error of about -25 is registered. This situation is preferable to the one depicted in Figure \ref{fig:dtperf}, as we think it's more important to correctly detect students that are likely to get low scores, in order to provide the help they need, than precisely predicting maximum scores for students who are already well performing in their studying career.
 
 \subsection{KNN Regression}
 KNN Regression is perhaps the simplest ML model, that uses \textbf{feature similarity} to predict the values of any new data points. 
@@ -270,7 +283,7 @@ We then scored every model and chose the one with the best score. The following 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.95\textwidth]{KNN_scores.png}
-\caption{\textit{RMSE} and \textit{R2} scores for every model.}
+\caption{\textit{RMSE} and \textit{R2} scores for every model}
 \label{fig:knn-scores}
 \end{figure}
 We only analyzed models with $k = 1, \ldots, 10$.
@@ -284,7 +297,7 @@ We want to find out if the model is better at predicting some grades than others
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.5\textwidth]{KNN_errs_class.png}
-\caption{Mean predictions error for grade classes.}
+\caption{Mean predictions error for grade classes}
 \label{fig:knn-err}
 \end{figure}
 The plot in the Figure \ref{fig:knn-err} shows the mean error of the model predictions (y axis), for $10$ range of grades (x axis).
@@ -297,7 +310,7 @@ We found the best value for $k$ with this \textit{Oversampled} dataset, just lik
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.95\textwidth]{KNN_scores_over.png}
-\caption{\textit{RMSE} and \textit{R2} scores for every model, with \textit{Oversampled} dataset.}
+\caption{\textit{RMSE} and \textit{R2} scores for every model, with \textit{Oversampled} dataset}
 \label{fig:knn-scores-over}
 \end{figure}
 As shown in Figure \ref{fig:knn-scores-over} the best model is the one with $k = 2$.
@@ -556,3 +569,4 @@ Finally, we compared our results and discussed about them to understand what we 
 \bibliography{sample}
 
 \end{document}
+
