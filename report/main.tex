@@ -12,7 +12,10 @@
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{subfig}
+
+\usepackage{multicol}
 \usepackage{placeins}
+
 \usepackage[colorlinks=true, allcolors=blue]{hyperref}
 
 \graphicspath{ {./figures/} }
@@ -186,12 +189,7 @@ We chose to compute the training and test sets for our ML models by splitting th
 \section{ML models training and testing}
 We leveraged the \textit{scikit-learn} Python library to implement some ML models for the regression and classification tasks of predicting the score of a student in a module-presentation assessment. We trained linear (\textit{linear regression}, \textit{logistic regression}) and non-linear (\textit{decision trees}, \textit{KNN}, \textit{neural networks}) models to see if there are some differences in the results they provide.\\
 
-We evaluated our regression models by computing the \textit{RMSE} and \textit{R2} scores, while we considered the \textit{accuracy} for our classification models.
-
-\section{ML models training and testing}
-We leveraged the \textit{scikit-learn} Python library to implement some ML models for the regression and classification tasks of predicting the score of a student in a module-presentation assessment. We trained linear (\textit{linear regression}, \textit{logistic regression}) and non-linear (\textit{decision trees}, \textit{KNN}, \textit{neural networks}) models to see if there are some differences in the results they provide.\\
-
-We evaluated our regression models by computing the \textit{RMSE} and \textit{R2} scores, while we considered the \textit{accuracy} for our classification models.
+We evaluated our regression models by computing the \textit{RMSE} and \textit{R2} scores, while we considered the \textit{accuracy} and the \textit{recall} for our classification models.
 
 \subsection{Linear regression}
 \FloatBarrier
@@ -317,6 +315,8 @@ These scores are worse than the ones obtained predicting with the standard datas
 
 Logistic regression is a statistical model suited for predicting the probability of an event occurring. In our case, given an assessment $A$ and a range of grades $[a,b]$ , the event we want to predict the probability of is "$A$'s grade falls in the range $[a,b]$". 
 
+\subsubsection{Assigning the classes}
+
 In order to work with this model, first we have to find a way to divide the assessments in the dataset in different classes. To do this, we tried different approaches, but first, let's define the notation:
 \begin{itemize}
 \item[] $C$: set of the classes. If we want to divide the students in 5 classes, $C$ will be $\{1,2,3,4,5\}$
@@ -336,7 +336,7 @@ and, if $Y_c[i] = n$, it means that $Y[i]$ belongs to class $n$
 Now we can define the different ways in which we can divide the dataset:
 
 \begin{itemize}
-    \item \textbf{uniform grades}: divide the total range of grades uniformly, so $Y_c$ is to be assigned as follows:
+    \item \textbf{uniform grades (UnGr)}: divide the total range of grades uniformly, so $Y_c$ is to be assigned as follows:
 
     $$
 Y_c[i]=\left\lceil\frac{Y[i]-\min{Y}}{\frac{\max{Y}-\min{Y}}{\lvert C\rvert}}\right\rceil
@@ -346,7 +346,7 @@ suppose we want 5 classes, assessments whose grade falls in the range $[0,20]$ w
 
 Due to the previously highlighted underrepresentation problem, this division results in heavily imbalanced classes, with fewer examples for classes representing worse grades and more examples for other classes.
 
- \item \textbf{uniform classes} : divide the dataset such that the resulting classes will have the same number of examples.
+ \item \textbf{uniform classes (UnCl)} : divide the dataset such that the resulting classes will have the same number of examples.
 
  Let $Y_{sort}$ be the sorted version of $Y$, and let $Y_{index}$ be the array of the assigned position for each value in $Y$ in its sorted version $Y_{sort}$:
 $$
@@ -357,20 +357,118 @@ $$
 Y_c[i]=\left\lceil \frac{Y_{index}[i]}{\frac{len(Y)}{\lvert C \rvert}} \right\rceil
 $$
 
-\item \textbf{uniform contribution}: divide the dataset such that the sum of the grades for each class's examples is the same. $Y_c$ is then assigned as follows: $$
+\item \textbf{uniform contribution (UnCo)}: divide the dataset such that the sum of the grades for each class's examples is the same. $Y_c$ is then assigned as follows: $$
 Y_c[i]=\left\lceil \frac{\sum\limits_{j\leq i} Y_{sort}[j]}{\frac{\sum\limits_j Y[j]}{\lvert C \rvert}} \right\rceil
 $$
 
-\item \textbf{fail/pass}: Divide the dataset in 2 classes. For each example, the assigned class reflects whether the assessment is successful (grade is above 40) or a failure (grade is lower or equal to 40).
+\item \textbf{fail/pass (F/P)}: Divide the dataset in 2 classes. For each example, the assigned class reflects whether the assessment is successful (grade is above 40) or a failure (grade is lower or equal to 40).
 $$
 Y_c[i]= \min{[1,\left\lfloor \frac{Y[i]}{40} \right\rfloor ]} +1
 $$
 
 \end{itemize}
 
-It is important to notice that \textbf{uniform classes} and \textbf{uniform contribution}, while exhibiting more balanced classes, 
-we took advantage of \textit{scikit-learn}'s \textit{LogisticRegression} class
+It is important to notice that \textbf{UnCl} and \textbf{UnCo}, while exhibiting more balanced classes, still don't solve the class imbalance problem: when they are used to assign the classes to the assessments, classes containing assessments with lower scores will span upon a quite wide range, compared to other classes (for instance, class 1 might include assessments with a grade in the range $[0-67]$, while class 5 could easily include assessments with a grade in $[95-100]$)
 
+\subsubsection{Implementation and oversampling}
+
+As for the implementation of the logistic regression model, we took advantage of \textit{scikit-learn}'s {\href{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html}{LogisticRegression}} class. It allows to specify a number of parameters (\textit{penalty},\textit{class\_weight},\textit{solver},...), none of which heavily influences the results that we obtained.
+
+By applying such model to the data as it is, we get the confusion matrices in figure \ref{fig:CMnoOS}
+\begin{figure}[h]
+    \includegraphics[width=.24\textwidth]{UnRa0.png}
+    \includegraphics[width=.24\textwidth]{UnCl0.png}
+    \includegraphics[width=.24\textwidth]{UnGr0.png}
+    \includegraphics[width=.24\textwidth]{FP0.png}
+    \caption{confusion matrices for logistic regression without oversampling. From left to right: \textit{UnGr}, \textit{UnCl}, \textit{UnCo} and \textit{F/P}. Classes go from 0 to 4 instad of going from 1 to 5 }
+    \label{fig:CMnoOS}
+\end{figure}
+
+As expected, without any kind of precautionary measure on the class imbalance, we get a model that's really bad at detecting failing assessments (\textit{UnGr}, matrix on the leftmost). This is because the majority of the dataset is classified as class 3 or 4, and other classes clearly do not get enough support to influence significantly the model. The problem is even more evident when we consider the confusion matrix for \textit{F/P}, as in this case almost all of the example in the test set is classified as 1 (pass).\textit{UnCl} and \textit{UnCo} do a better job at distinguishing assessments with low grades from assessment with high grades, but they end up in polarizing their decisions: either an assessment belongs to the higher class, or to the lower class.
+
+With the objective of mitigating the effect of the class imbalance, we execute oversampling on the dataset via the {\href{https://imbalanced-learn.org/stable/references/generated/imblearn.over_sampling.RandomOverSampler.html}{RandomOverSampler}} class from \textit{imbalanced-learn}, which naively oversamples the data by picking samples at random with replacement. Thus we get the results in figure \ref{fig:CMwOS}
+
+\begin{figure}[h]
+    \includegraphics[width=.24\textwidth]{UnRa1.png}
+    \includegraphics[width=.24\textwidth]{UnCl1.png}
+    \includegraphics[width=.24\textwidth]{UnGr1.png}
+    \includegraphics[width=.24\textwidth]{FP1.png}
+    \caption{confusion matrices for logistic regression with naive oversampling. From left to right: \textit{UnGr}, \textit{UnCl}, \textit{UnCo} and \textit{F/P}. Classes go from 0 to 4 instad of going from 1 to 5 }
+    \label{fig:CMwOS}
+\end{figure}
+
+While \textit{UnCl} and \textit{UnCo} don't seem to benefit much from oversampling, we get an interesting result from \textit{UnGr} and \textit{F/P}: even though assessments with higher grades are harder to predict, the amount of assessment with low grades that are correctly predicted increases significantly. We consider this to be a meaningful result, since detecting students that are at risk of failing an assessment and being able to support them is much more important than detecting students that are doing fine.
+
+\subsubsection{Results}
+
+In this section, we may observe some of the results obtained through our analysis. We evaluated the performance of logistic regression not only for the dataset as it is and on the randomly oversampled dataset, but also on a dataset oversampled via SMOTE (an oversampling technique that generates new synthetic data) and on a dataset enriched with polynomial features (thanks to \textit{scikit-learn}'s {\href{https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.PolynomialFeatures.html}{PolynomialFeatures}} class).
+\begin{table}[h]
+  \centering
+  \begin{tabular}{|p{3cm}|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+    \hline
+     & \multicolumn{2}{|c|}{\textbf{class 0}} & \multicolumn{2}{|c|}{\textbf{class 1}} & \multicolumn{2}{|c|}{\textbf{class 2}} & \multicolumn{2}{|c|}{\textbf{class 3}} & \multicolumn{2}{|c|}{\textbf{class 4}} & \textbf{Accuracy} \\
+    \hline
+    & P & R & P & R & P & R & P & R & P & R &  \\
+    \hline
+    \textbf{UnGr no oversampling} & 1.00 & 0.00 & 0.00 & 0.00 & 0.32 & 0.02 & 0.45 & 0.56 & 0.56 & 0.67 & 0.50 \\
+    \hline
+    \textbf{UnGr random oversampling} & 0.03 & 0.54 & 0.09 & 0.45 & 0.18 & 0.13 & 0.46 & 0.15 & 0.61 & 0.48 & 0.31 \\
+    \hline
+    \textbf{UnGr SMOTE} & 0.04 & 0.56 & 0.09 & 0.45 & 0.17 & 0.13 & 0.46 & 0.16 & 0.61 & 0.49 & 0.32 \\
+    \hline
+    \textbf{UnGr polynomial} & 0.37 & 0.07 & 0.18 & 0.01 & 0.27 & 0.02 & 0.47 & 0.58 & 0.58 & 0.69 & 0.52 \\
+    \hline
+    \textbf{UnGr polynomial SMOTE} & 0.05 & 0.52 & 0.09 & 0.45 & 0.20 & 0.17 & 0.50 & 0.27 & 0.64 & 0.50 & 0.37 \\
+    \hline
+    \textbf{UnCl no oversampling} & 0.34 & 0.48 & 0.28 & 0.24 & 0.25 & 0.07 & 0.34 & 0.36 & 0.40 & 0.57 & 0.34 \\
+    \hline
+    \textbf{UnCl random oversampling} & 0.34 & 0.48 & 0.28 & 0.24 & 0.25 & 0.07 & 0.34 & 0.36 & 0.40 & 0.57 & 0.34 \\
+    \hline
+    \textbf{UnCl SMOTE} & 0.34 & 0.48 & 0.28 & 0.24 & 0.25 & 0.07 & 0.34 & 0.36 & 0.40 & 0.57 & 0.34 \\
+    \hline
+    \textbf{UnCl polynomial} & 0.38 & 0.46 & 0.31 & 0.36 & 0.26 & 0.05 & 0.35 & 0.44 & 0.49 & 0.57 & 0.38 \\
+    \hline
+    \textbf{UnCl polynomial SMOTE} & 0.38 & 0.46 & 0.31 & 0.36 & 0.26 & 0.05 & 0.35 & 0.44 & 0.49 & 0.57 & 0.38 \\
+    \hline
+    \textbf{UnCo no oversampling} & 0.39 & 0.75 & 0.26 & 0.07 & 0.23 & 0.05 & 0.36 & 0.33 & 0.45 & 0.58 & 0.38 \\
+    \hline
+    \textbf{UnCo random oversampling} & 0.46 & 0.52 & 0.27 & 0.17 & 0.21 & 0.08 & 0.33 & 0.42 & 0.39 & 0.68 & 0.37 \\
+    \hline
+    \textbf{UnCo SMOTE} & 0.46 & 0.51 & 0.27 & 0.17 & 0.21 & 0.08 & 0.32 & 0.42 & 0.39 & 0.68 & 0.37 \\
+    \hline
+    \textbf{UnCo polynomial} & 0.43 & 0.71 & 0.31 & 0.19 & 0.24 & 0.05 & 0.36 & 0.38 & 0.53 & 0.62 & 0.41 \\
+    \hline
+    \textbf{UnCo polynomial SMOTE} & 0.50 & 0.51 & 0.31 & 0.31 & 0.23 & 0.06 & 0.33 & 0.48 & 0.49 & 0.67 & 0.40 \\
+    \hline
+  \end{tabular}
+  \caption{Evaluation metrics for multinomial case. P = precision, R = recall}
+  \label{tab:EvMetMultireg}
+\end{table}
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{|p{3cm}|c|c|c|c|c|}
+    \hline
+      & \multicolumn{2}{|c|}{\textbf{fail}} & \multicolumn{2}{|c|}{\textbf{pass}} & \textbf{Accuracy} \\
+    \hline
+    & P & R & P & R &  \\
+    \hline
+    \textbf{P/F no oversampling} & 0.00 & 0.00 & 0.96 & 1.00 & 0.96 \\
+    \hline
+    \textbf{P/F random oversampling} & 0.08 & 0.79 & 0.98 & 0.58 & 0.59 \\
+    \hline
+    \textbf{P/F SMOTE} & 0.08 & 0.78 & 0.98 & 0.59 & 0.60 \\
+    \hline
+    \textbf{P/F polynomial} & 0.25 & 0.01 & 0.96 & 1.00 & 0.96 \\
+    \hline
+    \textbf{P/F polynomial SMOTE} & 0.10 & 0.78 & 0.99 & 0.69 & 0.69 \\
+    \hline
+  \end{tabular}
+  \caption{Evaluation metrics for binomial case. P = precision, R = recall}
+  \label{tab:EvMetBinreg}
+\end{table}
+
+\FloatBarrier
 \subsection{Neural Networks}
 \FloatBarrier
 
