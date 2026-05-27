@@ -1,6 +1,6 @@
 # FDS Project
 
-> Machine learning experiments and comparative analysis on student performance datasets.
+> Comparative machine learning experiments on student performance datasets.
 
 ![Python](https://img.shields.io/badge/Python-3.x-blue)
 ![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-orange)
@@ -9,71 +9,61 @@
 
 ---
 
-## Overview
+## 📖 Overview
 
 This repository contains coursework developed for the **Foundations of Data Science** course during the Winter Semester 2023.
 
-The project investigates different supervised learning approaches applied to educational performance data. The main focus is not the development of a production-ready system, but rather the comparative study of machine learning techniques, preprocessing strategies, and evaluation methodologies.
+The project explores different supervised learning techniques applied to educational performance data. The focus is primarily methodological: comparing models, preprocessing strategies, and evaluation procedures rather than building a production-oriented system.
 
-The repository is structured as a collection of Jupyter notebooks, each dedicated to a specific model or methodological approach.
+The repository is organized as a collection of Jupyter notebooks, each dedicated to a specific machine learning approach.
 
 ---
 
-## Repository Structure
+## 📁 Repository Structure
 
 ```text
-fds_extract/
-    FDS_Project-main/
-        .gitignore
-        DecisionTrees.ipynb
-        KNNRegression.ipynb
-        LinearRegression.ipynb
-        MultiLogReg.ipynb
-        NeuralNetworks.ipynb
-        README.md
-        StudentPerformanceAnalysis.ipynb
-        report/
-            .DS_Store
-            DTheatmap1.png
-            DTheatmap2.png
-            DTnew.png
-            DToversamp.png
-            DTstructure.png
-            FP0.png
-            FP1.png
-            figures/
-                grades_errors.png
-                grades_errors2.png
+FDS_Project-main/
+│
+├── StudentPerformanceAnalysis.ipynb
+├── LinearRegression.ipynb
+├── KNNRegression.ipynb
+├── DecisionTrees.ipynb
+├── MultiLogReg.ipynb
+├── NeuralNetworks.ipynb
+│
+└── report/
+    ├── figures/
+    └── *.png
 ```
 
-### Main Components
+### Main Notebooks
 
 | Notebook | Description |
 |---|---|
-| `StudentPerformanceAnalysis.ipynb` | Exploratory analysis of the dataset and preliminary preprocessing |
-| `LinearRegression.ipynb` | Linear regression experiments and evaluation |
+| `StudentPerformanceAnalysis.ipynb` | Exploratory analysis and preprocessing |
+| `LinearRegression.ipynb` | Linear regression experiments |
 | `KNNRegression.ipynb` | K-Nearest Neighbors regression analysis |
-| `DecisionTrees.ipynb` | Decision tree models and performance comparison |
+| `DecisionTrees.ipynb` | Decision tree models and comparisons |
 | `MultiLogReg.ipynb` | Multinomial logistic regression experiments |
 | `NeuralNetworks.ipynb` | Neural network implementation and optimization |
 
 ---
 
-## Objectives
+## 🎯 Objectives
 
-The project explores:
+The project investigates:
 
 - exploratory data analysis (EDA);
 - preprocessing and feature engineering techniques;
 - regression and classification workflows;
-- comparison between classical ML models and neural approaches;
+- comparison between classical ML methods and neural approaches;
 - evaluation of model performance using standard metrics.
 
 ---
 
-## Technologies
+## 🛠 Technologies
 
-The implementation is based on Python and Jupyter notebooks.
+The implementation is based on **Python** and **Jupyter notebooks**.
 
 ### Main Libraries
 
@@ -87,9 +77,9 @@ The implementation is based on Python and Jupyter notebooks.
 
 ---
 
-## Methods
+## 📊 Methods
 
-The repository includes experiments with several machine learning methods:
+The repository includes experiments with several machine learning techniques:
 
 - Linear Regression
 - K-Nearest Neighbors (KNN)
@@ -97,7 +87,7 @@ The repository includes experiments with several machine learning methods:
 - Multinomial Logistic Regression
 - Feedforward Neural Networks
 
-Additional topics covered include:
+Additional topics addressed in the notebooks include:
 
 - feature scaling;
 - oversampling techniques;
@@ -107,7 +97,7 @@ Additional topics covered include:
 
 ---
 
-## Installation
+## ⚙️ Installation
 
 Clone the repository:
 
@@ -129,7 +119,7 @@ On Windows:
 venv\Scripts\activate
 ```
 
-Install dependencies:
+Install the required dependencies:
 
 ```bash
 pip install pandas numpy matplotlib seaborn scikit-learn torch imbalanced-learn notebook
@@ -137,7 +127,7 @@ pip install pandas numpy matplotlib seaborn scikit-learn torch imbalanced-learn 
 
 ---
 
-## Usage
+## 🚀 Usage
 
 Launch Jupyter Notebook:
 
@@ -145,7 +135,7 @@ Launch Jupyter Notebook:
 jupyter notebook
 ```
 
-Then open any notebook from the project directory.
+Then open the notebook of interest from the Jupyter interface.
 
 Suggested reading order:
 
@@ -158,15 +148,15 @@ Suggested reading order:
 
 ---
 
-## Notes
+## 📝 Notes
 
-- This repository was developed for academic purposes.
-- Some notebooks may rely on datasets or preprocessing steps defined in other notebooks.
-- Figures and report material are stored inside the `report/` directory.
+- The repository was developed primarily for academic purposes.
+- Some notebooks may depend on preprocessing steps performed in previous notebooks.
+- Figures and report material are stored in the `report/` directory.
 
 ---
 
-## Authors
+## 👥 Authors
 
 Developed for the **Foundations of Data Science** course (Winter Semester 2023).
 
